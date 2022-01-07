@@ -7,9 +7,9 @@ function Layout({ children }: { children: React.ReactNode }) {
       <main className="">
         <Head>
           <title>ReactSwap</title>
-          <meta name="description" content="Nft marketplace" />
+          <meta name="description" content="ReactSwap decentralized exchange" />
         </Head>
-        <div className="font-Roboto dark:text-white bg-teal-200 dark:bg-teal-900">
+        <div className="from-teal-200 to-blue-200 bg-gradient-to-br dark:from-teal-900 dark:via-black dark:to-blue-900 font-Roboto dark:text-white dark:bg-teal-900">
           <Navbar />
           {children}
         </div>

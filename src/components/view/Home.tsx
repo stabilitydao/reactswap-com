@@ -1,11 +1,15 @@
+import {useTheme} from "next-themes";
+
 function Home() {
+  const { theme } = useTheme()
+  console.log(theme)
   return (
     <div
       className=" w-screen flex flex-col justify-center items-center text-center"
       style={{ height: 'calc(100vh - 64px)' }}
     >
       <div>
-        <img src="/reactswap.png" alt="ReactSwap"/>
+        <img src={theme === 'light' ? "/reactswap.png" : "/reactswapDark.png"} alt="ReactSwap"/>
         <div className="flex text-3xl flex-col m-10 text-left font-bold">
           <div>Decentralized Exchange</div>
           <div>Yield farms</div>
