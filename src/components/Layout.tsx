@@ -9,7 +9,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           <title>ReactSwap</title>
           <meta name="description" content="Nft marketplace" />
         </Head>
-        <div className="font-Roboto dark:text-white bg-indigo-300 dark:bg-indigo-900">
+        <div className="font-Roboto dark:text-white bg-teal-200 dark:bg-teal-900">
           <Navbar />
           {children}
         </div>
