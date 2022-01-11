@@ -2,10 +2,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer components {
+    .btn {
+        @apply bg-gray-200 px-8 bg-gradient-to-r from-green-500 via-cyan-500 font-medium text-sm  to-indigo-500 transition-colors py-3 rounded-full;
+    }
+}
 body {
-  @apply dark:text-white bg-indigo-300 dark:bg-indigo-900;
+    @apply bg-darkblue text-white;
 }
 html {
-  min-width: 375px;
-  scroll-behavior: smooth;
+    min-width: 375px;
+    scroll-behavior: smooth;
 }

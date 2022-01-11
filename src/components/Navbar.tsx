@@ -1,47 +1,38 @@
-import { useState, useEffect } from 'react'
-import { useTheme } from 'next-themes'
-import { MoonIcon, SunIcon } from '@heroicons/react/solid'
+import { useState, useEffect } from 'react';
 
 function Navbar() {
-  const [Mounted, setMounted] = useState(false)
-  const { setTheme, systemTheme, theme } = useTheme()
+    const [Navbar, setNavbar] = useState(false);
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  const themeChanger = () => {
-    if (!Mounted) return null
-    const currentTheme = theme === 'system' ? systemTheme : theme
-    if (currentTheme === 'dark') {
-      return (
-        <SunIcon
-          className="w-7 h-7"
-          role="button"
-          onClick={() => {
-            setTheme('light')
-          }}
-        />
-      )
-    } else {
-      return (
-        <MoonIcon
-          className="w-7 h-7"
-          role="button"
-          onClick={() => {
-            setTheme('dark')
-          }}
-        />
-      )
-    }
-  }
-  return (
-    <nav className="h-16 flex flex-row items-center justify-between px-6">
-      <div className="flex">
-        <img src="/reacttoken.svg" className="h-10 w-10" alt=""/> <h1 className=" ml-3 self-center font-bold text-2xl">ReactSwap</h1>
-      </div>
-      {themeChanger()}
-    </nav>
-  )
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const handleScroll = () => {
+        if (window.scrollY >= 80) {
+            setNavbar(true);
+        } else {
+            setNavbar(false);
+        }
+    };
+
+    return (
+        <nav
+            className={` text-white sticky   top-0 border-b duration-300 border-gray-800 ${
+                Navbar ? 'bg-darkblue shadow-xl' : ''
+            }`}
+        >
+            <div className="flex items-center h-24 container mx-auto px-2 justify-between">
+                <div className="flex items-center ">
+                    <img src="/reacttoken.svg" className="h-12 w-12" alt="" />{' '}
+                    <h1 className=" ml-3 self-center font-bold text-2xl ">
+                        ReactSwap
+                    </h1>
+                </div>
+                <button className="btn">Coming Soon</button>
+            </div>
+        </nav>
+    );
 }
 
-export default Navbar
+export default Navbar;
