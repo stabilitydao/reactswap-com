@@ -37,7 +37,8 @@ function Navbar() {
   return (
     <nav className="h-16 flex flex-row items-center justify-between px-6">
       <div className="flex">
-        <img src="/reacttoken.svg" className="h-10 w-10" alt=""/> <h1 className=" ml-3 self-center font-bold text-2xl">ReactSwap</h1>
+        <img src="/reacttoken.svg" className="h-10 w-10" alt="" />{' '}
+        <h1 className=" ml-3 self-center font-bold text-2xl">ReactSwap</h1>
       </div>
       {themeChanger()}
     </nav>

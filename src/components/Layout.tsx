@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar'
 import { ThemeProvider } from 'next-themes'
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider enableSystem={true} attribute="class">
+    <ThemeProvider defaultTheme="dark" attribute="class">
       <main className="">
         <Head>
           <title>ReactSwap</title>
