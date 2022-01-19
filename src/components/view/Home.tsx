@@ -16,17 +16,18 @@ function Home() {
           alt="ReactSwap"
         />
         <div className="text-6xl md:text-8xl mt-8">ReactSwap</div>
-        <br/>
+        <br />
         <div className="text-5xl md:text-6xl mt-8">Decentralized exchange</div>
         <div className="text-3xl text-left my-5 max-w-lg w-full">
           <ul>
             <li>Uniswap-V2 based AMM</li>
-            <li>Liquidity migration tool</li>
+            <li>LP lock</li>
+            <li>Liquidity migration</li>
             <li>Limit orders</li>
           </ul>
         </div>
 
-        <br/>
+        <br />
 
         <div className="text-5xl md:text-6xl mt-8">Yield farms</div>
         <div className="text-3xl text-left my-5 max-w-lg w-full">
@@ -37,7 +38,7 @@ function Home() {
           </ul>
         </div>
 
-        <br/>
+        <br />
 
         <div className="text-5xl md:text-6xl mt-8">Staking</div>
         <div className="text-3xl text-left my-5 max-w-lg w-full">
@@ -48,7 +49,7 @@ function Home() {
           </ul>
         </div>
 
-        <br/>
+        <br />
 
         <div className="text-5xl md:text-6xl mt-8">More features</div>
         <div className="text-3xl text-left my-5 max-w-lg w-full">
@@ -59,7 +60,7 @@ function Home() {
           </ul>
         </div>
 
-        <br/>
+        <br />
 
         <div className="text-5xl md:text-6xl mt-8">Developed by DAO</div>
         <div className="text-3xl text-left my-5 max-w-lg w-full">
@@ -70,9 +71,9 @@ function Home() {
             <li>Modern technology stack</li>
           </ul>
         </div>
-        <br/>
-        <br/>
-        <br/>
+        <br />
+        <br />
+        <br />
 
         <div className="flex text-6xl gap-10 mt-8">
           <a
