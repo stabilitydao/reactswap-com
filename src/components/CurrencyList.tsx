@@ -229,8 +229,9 @@ export default function CurrencyList({
   console.log('CurrencyList currencies', currencies?.map(c => c?.symbol))
   console.log(currencies.length)
 
+
   const Row = useCallback(
-    function TokenRow({ data, index, style }) {
+    ({ data, index, style }: {data:any, index:any, style: any}) => {
       const row: Currency | BreakLine = data[index]
 
       if (isBreakLine(row)) {

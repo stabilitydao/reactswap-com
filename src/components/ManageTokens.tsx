@@ -44,7 +44,7 @@ export default function ManageTokens({
 
   // manage focus on modal show
   const inputRef = useRef<HTMLInputElement>()
-  const handleInput = useCallback((event) => {
+  const handleInput = useCallback((event:any) => {
     const input = event.target.value
     const checksummedInput = isAddress(input)
     setSearchQuery(checksummedInput || input)
@@ -73,7 +73,7 @@ export default function ManageTokens({
         <div className="w-full flex justify-between" key={token.address}>
           <div className="flex">
             <CurrencyLogo currency={token} size={'20px'} />
-            <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank">
+            <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank" rel="noreferrer" >
               <div className="font-bold ml-2">
                 {token.symbol}
               </div>

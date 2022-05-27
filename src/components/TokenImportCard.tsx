@@ -3,16 +3,9 @@ import { TokenList } from '@uniswap/token-lists'
 import CurrencyLogo from '@/src/components/CurrencyLogo'
 import ListLogo from '@/src/components/ListLogo'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
-import { transparentize } from 'polished'
 import { AlertCircle } from 'react-feather'
 import styled, { useTheme } from 'styled-components'
 import { ExplorerDataType, getExplorerLink } from '@/src/utils/getExplorerLink'
-
-const WarningWrapper = styled.div<{ highWarning: boolean }>`
-  background-color: ${({ theme, highWarning }) =>
-    highWarning ? transparentize(0.8, theme.red1) : transparentize(0.8, theme.yellow2)};
-  width: fit-content;
-`
 
 const AddressText = styled.div`
   color: blue;
@@ -43,7 +36,7 @@ const TokenImportCard = ({ list, token }: TokenImportCardProps) => {
           </div>
         </div>
         {chainId && (
-          <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank">
+          <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank" rel="noreferrer">
             <AddressText>{token.address}</AddressText>
           </a>
         )}

@@ -35,7 +35,7 @@ export function useTokenFromNetwork(tokenAddress: string | null | undefined): To
   console.log('use token from network')
   return null
 
-  const { chainId } = useActiveWeb3React()
+ /* const { chainId } = useActiveWeb3React()
 
   const formattedAddress = isAddress(tokenAddress)
 
@@ -73,7 +73,7 @@ export function useTokenFromNetwork(tokenAddress: string | null | undefined): To
     tokenName.loading,
     tokenName.result,
     tokenNameBytes32.result,
-  ])
+  ])*/
 }
 
 /**

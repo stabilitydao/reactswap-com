@@ -75,11 +75,10 @@ function Swap() {
   )
 
   useEffect(() => {
-    // console.log('useEffect hook, deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString())
     let isSubscribed = true
 
     if (inputCurrency && outputCurrency && parsedAmount) {
-      for (let aggId in aggregators[chainId]) {
+      for (const aggId in aggregators[chainId]) {
         if (!quotes[aggId] || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString() || quotes[aggId]?.outputCurrencyId != outputCurrencyId) {
           console.log(`Quoting ${aggId}..`)
           aggregators[chainId][aggId].getQuote(
@@ -100,8 +99,12 @@ function Swap() {
     }
 
     return () => {isSubscribed = false}
-
-  }, [chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString()])
+  }, [
+    chainId,
+    inputCurrency,
+    outputCurrency,
+    parsedAmount?.quotient.toString()
+  ])
 
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
     let bestQuote: SwapQuote|undefined
@@ -120,7 +123,9 @@ function Swap() {
     })
 
     return bestQuote
-  }, [quotes])
+  }, [
+    JSON.stringify(quotes)
+  ])
 
   console.log('Quotes:', quotes)
   console.log('BestQuote:', bestQuote)
@@ -132,7 +137,7 @@ function Swap() {
         console.log('AllowanceTarget:', allowanceTarget)
       })
     }
-  }, [chainId, bestQuote?.protocolId])
+  }, [chainId, bestQuote])
 
 
   // check balance
@@ -155,8 +160,8 @@ function Swap() {
 
   // build tx
   useEffect(() => {
+    let isSubscribed = true
     const getTxData = async () => {
-      console.log('Buildtx useEffect hook async')
       if (
         account
         && inputCurrency
@@ -178,15 +183,27 @@ function Swap() {
           allowanceTarget,
           bestQuote
         )
-
-        setTxData(txData)
+        console.log('Buildtx setTxData')
+        if (isSubscribed) {
+          setTxData(txData)
+        }
       }/* else {
         setTxData(undefined)
       }*/
     }
 
     getTxData()
-  }, [chainId,inputBalance?.quotient.toString(), parsedAmount?.quotient.toString(), bestQuote?.protocolId, needToApprove])
+    return () => {isSubscribed = false}
+  }, [
+    chainId,
+    inputBalance?.quotient.toString(),
+    parsedAmount?.quotient.toString(),
+    bestQuote,
+    needToApprove,
+    allowanceTarget,
+    account,
+    insufficientBalance
+  ])
 
   console.log('Swap tx:', txData)
 
@@ -211,7 +228,7 @@ function Swap() {
   )
 
   const handleInputSelect = useCallback(
-    (inputCurrency) => {
+    (inputCurrency:Currency) => {
       // setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
       setquotes({})
@@ -220,7 +237,7 @@ function Swap() {
   )
 
   const handleOutputSelect = useCallback(
-    (outputCurrency) => {
+    (outputCurrency:Currency) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
       setquotes({})
     },
@@ -262,7 +279,7 @@ function Swap() {
         })
     }
   }, [
-    bestQuote?.protocolId,
+    bestQuote,
     txData
   ])
 

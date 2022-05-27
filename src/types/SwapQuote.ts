@@ -1,10 +1,10 @@
 import { ChainId } from '@/src/enums/ChainId'
 import { AggregatorId } from '@/src/enums/AggregatorId'
-import { AmmId } from '@/src/enums/AmmId'
+// import { AmmId } from '@/src/enums/AmmId'
 
 export type SwapQuote = {
   chainId: ChainId
-  protocolId: AggregatorId|AmmId
+  protocolId: AggregatorId/*|AmmId*/
   inputCurrencyId: string
   inputAmount: string
   outputCurrencyId: string

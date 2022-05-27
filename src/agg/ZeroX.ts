@@ -86,7 +86,7 @@ export class ZeroX implements SwapAggregator {
       to: swapQuote.to,
       data: swapQuote.data,
       ...(swapQuote.gasPrice ? {gasPrice: BigInt(swapQuote.gasPrice.toString())} : {}),
-      ...(swapQuote.gas ? {gasLimit: BigInt(swapQuote.gas.toString())} : {}),
+      // ...(swapQuote.gas ? {gasLimit: BigInt(swapQuote.gas.toString())} : {}),
       ...(swapQuote.value && swapQuote.value > 0 ? {value: BigInt(swapQuote.value.toString())} : {}),
     }
   }

@@ -160,9 +160,6 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
     return `v${version.major}.${version.minor}.${version.patch}`
   }
 
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
   return (
     <RowWrapper
       active={isActive}
@@ -194,7 +191,7 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
               <PopoverContainer className="bg-indigo-800" show={true} ref={setPopperElement as any} style={styles.popper} {...attributes.popper}>
                 <div>{list && listVersionLabel(list.version)}</div>
                 <br />
-                <a href={`https://tokenlists.org/token-list?url=${listUrl}`} target="_blank">
+                <a href={`https://tokenlists.org/token-list?url=${listUrl}`} target="_blank" rel="noreferrer">
                   <span>View list</span>
                 </a>
                 <button className="btn" onClick={handleRemoveList} disabled={Object.keys(listsByUrl).length === 1}>
@@ -260,7 +257,7 @@ export function ManageLists({
   // sort by active but only if not visible
   const activeListUrls = useActiveListUrls()
 
-  const handleInput = useCallback((e) => {
+  const handleInput = useCallback((e:any) => {
     setListUrlInput(e.target.value)
   }, [])
 

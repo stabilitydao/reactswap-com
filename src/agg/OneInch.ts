@@ -122,7 +122,7 @@ export class OneInch implements SwapAggregator {
       toTokenAddress: token1.isToken ? token1.address : '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
       amount: amount.quotient.toString(),
       fromAddress: from,
-      slippage: '0.5',
+      slippage: '2',
       fee,
       referrerAddress: feeReceiver[this.chainId],
     }

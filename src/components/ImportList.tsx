@@ -81,7 +81,7 @@ export function ImportList({ listURL, list, setModalView, onDismiss }: ImportPro
                       <span>{list.tokens.length} tokens</span>
                     </div>
                   </div>
-                  <a href={`https://tokenlists.org/token-list?url=${listURL}`} target="_blank">
+                  <a href={`https://tokenlists.org/token-list?url=${listURL}`} target="_blank" rel="noreferrer">
                     <div>
                       {listURL}
                     </div>

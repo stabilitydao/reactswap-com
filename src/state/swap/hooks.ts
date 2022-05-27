@@ -12,8 +12,6 @@ import { useUserSlippageToleranceWithDefault } from '@/src/state/user/hooks'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import useCurrency from '@/src/hooks/useCurrency'
 import { useCurrencyBalances } from '@/src/hooks/useCurrencyBalance'
-import { useAllQuotes } from '@/src/hooks/useQuote'
-import { useChainId } from '@/src/state/network/hooks'
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)

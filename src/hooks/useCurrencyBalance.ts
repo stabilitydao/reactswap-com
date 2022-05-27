@@ -62,14 +62,14 @@ export function useTokenBalancesWithLoadingIndicator(
   address?: string,
   tokens?: (Token | undefined)[]
 ): [{ [tokenAddress: string]: CurrencyAmount<Token> | undefined }, boolean] {
-  console.log('useTokenBalancesWithLoadingIndicator tokens:', tokens?.map(t => t?.symbol))
+  // console.log('useTokenBalancesWithLoadingIndicator tokens:', tokens?.map(t => t?.symbol))
   const validatedTokens: Token[] = useMemo(
     () => tokens?.filter((t?: Token): t is Token => isAddress(t?.address) !== false) ?? [],
     [tokens]
   )
   const validatedTokenAddresses = useMemo(() => validatedTokens.map((vt) => vt.address), [validatedTokens])
 
-  console.log('useMultipleContractSingleData call')
+  // console.log('useMultipleContractSingleData call')
   const balances: CallState[] = useMultipleContractSingleData(
     validatedTokenAddresses,
     ERC20Interface,
@@ -120,9 +120,9 @@ export function useCurrencyBalances(
   account?: string,
   currencies?: (Currency | undefined)[]
 ): (CurrencyAmount<Currency> | undefined)[] {
-  if (account) {
+  /*if (account) {
     console.log('useCurrencyBalances currencies', currencies?.map(c => c?.symbol))
-  }
+  }*/
 
   const tokens = useMemo(
     () => currencies?.filter((currency): currency is Token => currency?.isToken ?? false) ?? [],

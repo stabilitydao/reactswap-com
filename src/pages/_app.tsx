@@ -10,6 +10,7 @@ import { Web3ReactProvider } from '@web3-react/core'
 import React from 'react'
 import { usePollBlockNumber } from '@/src/state/block/hooks'
 
+// @typescript-eslint/no-explicit-any
 function getLibrary(provider: any): Web3Provider {
   return new Web3Provider(
     provider,
