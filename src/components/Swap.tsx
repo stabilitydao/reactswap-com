@@ -12,20 +12,21 @@ import { ApprovalState, useApproval } from '@/src/hooks/useApproval'
 import JSBI from 'jsbi'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
+import { TransactionResponse } from '@ethersproject/providers'
+import Loader from '@/components/Loader'
 
 function Swap() {
-  console.log('Swap render')
+  // console.log('Swap render')
   const chainId = useChainId()
   const { account, library } = useActiveWeb3React()
   // const loadedUrlParams = useDefaultsFromURLSearch(chainId)
 
-  // const [outputAmount, setoutputAmount] = useState<string>('')
-
-  const [quotes, setquotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
-
+  const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
   const [allowanceTarget, setAllowanceTarget] = useState<string|undefined>()
   const [pendingApproval, setPendingApproval] = useState<boolean>(false)
-  const [txData, setTxData] = useState<TransactionRequest|undefined>(undefined)
+  const [approved, setApproved] = useState<boolean>(false)
+  const [txData, setTxData] = useState<TransactionRequest|undefined>()
+  const [pendingSwap, setPendingSwap] = useState<boolean>(false)
 
   /*const [loadedInputCurrency, loadedOutputCurrency] = [
     useCurrency(loadedUrlParams?.inputCurrencyId),
@@ -59,14 +60,11 @@ function Swap() {
   const { inputValue, inputCurrencyId, outputCurrencyId } = useSwapState()
 
   const {
-    // trade: { state: tradeState, trade },
     // allowedSlippage,
     parsedAmount,
     inputCurrency,
     outputCurrency,
     inputBalance,
-
-    // inputError: swapInputError,
   } = useDerivedSwapInfo()
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = useMemo(
@@ -87,10 +85,10 @@ function Swap() {
             parsedAmount,
             account ?? undefined
           ).then(quote => {
-            console.log(`${aggId} reply quote data:`, quote)
+            // console.log(`${aggId} reply quote data:`, quote)
             if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
               if (isSubscribed) {
-                setquotes(q => ({...q, [aggId]: quote}))
+                setQuotes(q => ({...q, [aggId]: quote}))
               }
             }
           })
@@ -108,7 +106,6 @@ function Swap() {
 
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
     let bestQuote: SwapQuote|undefined
-
     Object.keys(quotes).forEach(aggId => {
       const q = quotes[aggId]
       if (
@@ -121,14 +118,13 @@ function Swap() {
         bestQuote = q
       }
     })
-
     return bestQuote
   }, [
     JSON.stringify(quotes)
   ])
 
-  console.log('Quotes:', quotes)
-  console.log('BestQuote:', bestQuote)
+  // console.log('Quotes:', quotes)
+  // console.log('BestQuote:', bestQuote)
 
   useEffect(() => {
     if (bestQuote && inputCurrency?.isNative === false) {
@@ -139,13 +135,25 @@ function Swap() {
     }
   }, [chainId, bestQuote])
 
-
   // check balance
   const insufficientBalance =
     inputBalance && parsedAmount?.greaterThan(inputBalance)
 
   // check approval
   const [approval, approveCallback] = useApproval(parsedAmount, allowanceTarget, pendingApproval)
+
+  // console.log('Approval state:', approval)
+
+  useEffect(() => {
+    if (approval === ApprovalState.PENDING) {
+      setPendingApproval(true)
+    }
+    if (approval === ApprovalState.APPROVED) {
+      setApproved(true)
+      setPendingApproval(false)
+    }
+  }, [approval])
+
   const needToApprove =
     inputCurrency
     && outputCurrency
@@ -155,8 +163,8 @@ function Swap() {
     && !pendingApproval
     && !inputCurrency?.isNative
     && approval === ApprovalState.NOT_APPROVED
+    && !approved
 
-  console.log('Approval state:', approval)
 
   // build tx
   useEffect(() => {
@@ -166,7 +174,7 @@ function Swap() {
         account
         && inputCurrency
         && parsedAmount
-        && allowanceTarget
+        && (allowanceTarget || inputCurrency.isNative)
         && outputCurrency
         && inputBalance?.greaterThan(JSBI.BigInt(0))
         && !needToApprove
@@ -180,7 +188,7 @@ function Swap() {
           outputCurrency,
           parsedAmount,
           account,
-          allowanceTarget,
+          bestQuote.to,
           bestQuote
         )
         console.log('Buildtx setTxData')
@@ -205,7 +213,7 @@ function Swap() {
     insufficientBalance
   ])
 
-  console.log('Swap tx:', txData)
+  // console.log('Swap tx:', txData)
 
   const canSwap =
     inputCurrency
@@ -221,17 +229,16 @@ function Swap() {
   const handleTypeInput = useCallback(
     (value: string) => {
       onUserInput(value)
-      // setoutputAmount('')
-      setquotes({})
+      setQuotes({})
     },
     [onUserInput]
   )
 
   const handleInputSelect = useCallback(
     (inputCurrency:Currency) => {
-      // setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
-      setquotes({})
+      setQuotes({})
+      setApproved(false)
     },
     [onCurrencySelection]
   )
@@ -239,7 +246,7 @@ function Swap() {
   const handleOutputSelect = useCallback(
     (outputCurrency:Currency) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
-      setquotes({})
+      setQuotes({})
     },
     [onCurrencySelection]
   )
@@ -251,7 +258,18 @@ function Swap() {
   }, [maxInputAmount, onUserInput])
 
   const handleApprove = useCallback(async () => {
-    await approveCallback()
+    const res: { response: TransactionResponse; tokenAddress: string; spenderAddress: string } | undefined
+      = await approveCallback()
+
+    setPendingApproval(true)
+
+    if (res) {
+      res.response.wait(1).then(() => {
+        console.log('approval tx confirmed')
+        setPendingApproval(false)
+        setApproved(true)
+      })
+    }
   }, [
     approveCallback,
     bestQuote
@@ -264,16 +282,24 @@ function Swap() {
         .getSigner()
         .sendTransaction(txData)
         .then((response) => {
-          console.log(response)
-          return response
+          setPendingSwap(true)
+          // console.log(response)
+          response.wait(1).then(() => {
+            setPendingSwap(false)
+            onUserInput('')
+          })
+          // return response
         })
         .catch((error) => {
+          setPendingSwap(false)
           // if the user rejected the tx, pass this along
           if (error?.code === 4001) {
             throw new Error(`Transaction rejected.`)
           } else {
             // otherwise, the error was unexpected and we need to convey that
             console.error(`Swap failed`, error)
+            console.debug('txData: ', txData)
+            console.debug('bestQuote: ', bestQuote)
             throw new Error(`Swap failed`)
           }
         })
@@ -314,10 +340,22 @@ function Swap() {
             <div className="dark:text-red-200 text-xl font-bold">Insuffucient balance</div>
           )}
           {needToApprove && (
-            <button className="dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve {bestQuote?.protocolId} router</button>
+            <button className="w-full dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve {bestQuote?.protocolId} router</button>
           )}
-          {canSwap && (
-            <button className="dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>
+          {pendingApproval && (
+            <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
+              <span>pending approval</span>
+              <Loader stroke="#ffffff"/>
+            </div>
+          )}
+          {canSwap && !pendingSwap && (
+            <button className="w-full dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>
+          )}
+          {pendingSwap && (
+            <div className="w-full justify-center flex items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
+              <span className="mr-4">pending swap</span>
+              <Loader stroke="#ffffff"/>
+            </div>
           )}
         </div>
       </div>

@@ -46,7 +46,7 @@ function Navbar() {
   return (
     <nav className="h-16 flex flex-row items-center justify-between px-6">
       <div className="flex">
-        <img src="/reacttoken.svg" className="h-10 w-10" alt="" />{' '}
+        <img src="/img/react.png" className="h-10 w-10" alt="" />{' '}
         <h1 className=" ml-3 self-center font-bold text-2xl">ReactSwap</h1>
       </div>
       <div className="flex items-center">

@@ -20,7 +20,7 @@ import { useChainId } from '@/src/state/network/hooks'
 export function useNativeCurrencyBalances(uncheckedAddresses?: (string | undefined)[]): {
   [address: string]: CurrencyAmount<Currency> | undefined
 } {
-  console.log('useNativeCurrencyBalances addresses: ', uncheckedAddresses)
+  // console.log('useNativeCurrencyBalances addresses: ', uncheckedAddresses)
 
   const chainId = useChainId()
   // const { chainId } = useActiveWeb3React()
@@ -149,9 +149,9 @@ export default function useCurrencyBalance(
   account?: string,
   currency?: Currency
 ): CurrencyAmount<Currency> | undefined {
-  if (account) {
-    console.log('useCurrencyBalance account', account)
-  }
+  // if (account) {
+    // console.log('useCurrencyBalance account', account)
+  // }
 
   return useCurrencyBalances(
     account,

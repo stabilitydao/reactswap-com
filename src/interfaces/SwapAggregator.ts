@@ -22,7 +22,7 @@ export interface SwapAggregator {
     token1: Currency,
     amount: CurrencyAmount<Currency>,
     from: string,
-    allowanceTarget: string,
+    to?: string,
     swapQuote?: SwapQuote,
     slippage?: number,
     gasLimit?: string

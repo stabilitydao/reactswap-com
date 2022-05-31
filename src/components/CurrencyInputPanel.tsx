@@ -89,7 +89,7 @@ export default function CurrencyInputPanel({
             spellCheck="false"
           />
         ) : (
-          <div className="w-40 h-10 text-2xl  text-right p-3">{value && parseFloat(value) > 0 && currency ? value : null}</div>
+          <div className="mt-1 flex justify-end items-center border-2 dark:border-gray-500 w-40 h-12  text-2xl  text-right p-3">{value && parseFloat(value) > 0 && currency ? value : null}</div>
         )}
         {account ? (
           <div style={{ height: '17px' }} className="text-right pr-3">

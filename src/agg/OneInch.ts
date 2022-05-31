@@ -77,6 +77,7 @@ export class OneInch implements SwapAggregator {
         outputCurrencyId: params.toTokenAddress,
         outputAmount: data.toTokenAmount,
         outputAmountFixed: CurrencyAmount.fromRawAmount(token1, data.toTokenAmount).toFixed(6),
+        to: undefined,
         estimatedGas: data.estimatedGas,
         sources: data.protocols,
       }
@@ -102,7 +103,7 @@ export class OneInch implements SwapAggregator {
         inputAmount: amount.quotient.toString(),
         inputCurrencyId: params.fromTokenAddress,
         outputCurrencyId: params.toTokenAddress,
-        error: JSON.stringify(error)
+        error: error.toString()
       }
     }
   }
@@ -112,7 +113,7 @@ export class OneInch implements SwapAggregator {
     token1: Currency,
     amount: CurrencyAmount<Currency>,
     from: string,
-    allowanceTarget: string,
+    to?: string,
     swapQuote?: SwapQuote,
     slippage?: number,
     gasLimit?: string
@@ -138,7 +139,7 @@ export class OneInch implements SwapAggregator {
 
       return {
         from,
-        to: allowanceTarget,
+        to: data.tx.to,
         value: BigInt(data.tx.value),
         data: data.tx.data,
         gasLimit: BigInt(data.tx.gas),

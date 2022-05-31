@@ -220,7 +220,7 @@ export function useMultipleContractSingleData(
   const results = useCallsData(calls, options)
 
   const currentBlock = useCurrentBlock()
-  console.log('useMultipleContractSingleData current block:', currentBlock)
+  // console.log('useMultipleContractSingleData current block:', currentBlock)
 
   return useMemo(() => {
     return results.map((result) => toCallState(result, contractInterface, fragment, currentBlock))
