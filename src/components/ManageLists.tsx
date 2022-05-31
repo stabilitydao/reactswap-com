@@ -7,7 +7,6 @@ import { CheckCircle, Settings } from 'react-feather'
 import { usePopper } from 'react-popper'
 import { useAppDispatch, useAppSelector } from '@/src/state/store'
 import styled from 'styled-components'
-
 import { useFetchListCallback } from '@/src/hooks/useFetchListCallback'
 import { useOnClickOutside } from '@/src/hooks/useOnClickOutside'
 import useToggle from '@/src/hooks/useToggle'
@@ -22,12 +21,6 @@ const Wrapper = styled.div`
   flex-direction: column;
   flex: 1;
   overflow-y: hidden;
-`
-
-const UnpaddedLinkStyledButton = styled.button`
-  padding: 0;
-  font-size: 1rem;
-  opacity: ${({ disabled }) => (disabled ? '0.4' : '1')};
 `
 
 const PopoverContainer = styled.div<{ show: boolean }>`
@@ -69,15 +62,11 @@ const StyledListUrlText = styled.span<{ active: boolean }>`
   color: ${({ theme, active }) => (active ? theme.white : theme.text2)};
 `
 
-const RowWrapper = styled.div<{ bgColor: string; active: boolean; hasActiveTokens: boolean }>`
-  background-color: ${({ bgColor, active, theme }) => (active ? bgColor ?? 'transparent' : theme.bg2)};
+const RowWrapper = styled.div<{ hasActiveTokens: boolean }>`
   opacity: ${({ hasActiveTokens }) => (hasActiveTokens ? 1 : 0.4)};
   transition: 200ms;
   display: flex;
   width: 100%;
-  align-items: center;
-  padding: 1rem;
-  border-radius: 20px;
 `
 
 export const ButtonEmpty = styled.button`
@@ -162,12 +151,11 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
 
   return (
     <RowWrapper
-      active={isActive}
       hasActiveTokens={activeTokensOnThisChain > 0}
-      bgColor={'#111ad1'/*listColor*/}
       key={listUrl}
       id={listUrlRowHTMLId(listUrl)}
     >
+      <div className={isActive ? "flex w-full p-5 rounded-3xl bg-blue-400 dark:bg-blue-600" : "flex w-full p-5 bg-transparent"}>
       {list.logoURI ? (
         <ListLogo style={{ width: 40, height: 40, marginRight: '1rem' }} logoURI={list.logoURI} alt={`${list.name} list logo`} />
       ) : (
@@ -214,6 +202,7 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
           isActive ? handleDisableList() : handleEnableList()
         }}
       />
+      </div>
     </RowWrapper>
   )
 })
@@ -343,11 +332,12 @@ export function ManageLists({
   return (
     <Wrapper>
       <div className="flex flex-col gap-4">
-        <div>
+        <div className="flex">
           <input
+            className="w-full mx-5 px-3 text-xl"
             type="text"
             id="list-add-input"
-            placeholder={`https:// or ipfs:// or ENS name`}
+            placeholder={`https:// or ipfs://`}
             value={listUrlInput}
             onChange={handleInput}
           />
@@ -361,10 +351,10 @@ export function ManageLists({
       {tempList && (
         <div className="flex flex-col">
           <div className="bg-indigo-600 py-4 px-8">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <div className="flex">
                 {tempList.logoURI && <ListLogo logoURI={tempList.logoURI} size="40px" />}
-                <div className="flex gap-2 ml-8">
+                <div className="flex flex-col gap-2 ml-8">
                   <div className="font-bold">{tempList.name}</div>
                   <div>
                     <span>{tempList.tokens.length} tokens</span>
@@ -382,7 +372,7 @@ export function ManageLists({
                 </div>
               ) : (
                 <button
-                  className="btn px-4 py-2 text-lg "
+                  className="btn h-10 px-4 py-2 text-lg dark:bg-green-700"
                   onClick={handleImport}
                 >
                   <span>Import</span>
@@ -394,7 +384,7 @@ export function ManageLists({
       )}
       <br />
       <ListContainer>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col">
           {sortedLists.map((listUrl) => (
             <ListRow key={listUrl} listUrl={listUrl} />
           ))}

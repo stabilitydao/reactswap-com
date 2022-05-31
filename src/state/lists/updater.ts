@@ -10,8 +10,10 @@ import { acceptListUpdate, enableList } from './actions'
 import { useActiveListUrls } from './hooks'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/src/state/store'
+import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 
 export default function Updater(): null {
+  const { library } = useActiveWeb3React()
   const dispatch = useDispatch<AppDispatch>()
   const isWindowVisible = useIsWindowVisible()
 
@@ -28,7 +30,7 @@ export default function Updater(): null {
   }, [fetchList, isWindowVisible, lists])
 
   // fetch all lists every 10 minutes
-  useInterval(fetchAllListsCallback, 1000 * 60 * 10)
+  useInterval(fetchAllListsCallback, library ? 1000 * 60 * 10 : null)
 
   // whenever a list is not loaded and not loading, try again to load it
   useEffect(() => {

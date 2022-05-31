@@ -3,7 +3,6 @@ import { TokenList } from '@uniswap/token-lists'
 import { useState } from 'react'
 import { ArrowLeft, X } from 'react-feather'
 import styled from 'styled-components'
-
 import { CurrencyModalView } from './CurrencySearchModal'
 import { ManageLists } from './ManageLists'
 import ManageTokens from './ManageTokens'
@@ -20,24 +19,6 @@ const ToggleWrapper = styled.div`
   background-color: ${({ theme }) => theme.bg3};
   border-radius: 12px;
   padding: 6px;
-`
-
-const ToggleOption = styled.div<{ active?: boolean }>`
-  width: 48%;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-weight: 600;
-  background-color: ${({ theme, active }) => (active ? theme.bg1 : theme.bg3)};
-  color: ${({ theme, active }) => (active ? theme.text1 : theme.text2)};
-  user-select: none;
-
-  :hover {
-    cursor: pointer;
-    opacity: 0.7;
-  }
 `
 
 export default function Manage({
@@ -64,18 +45,18 @@ export default function Manage({
           <span className="text-xl">
             <span>Manage</span>
           </span>
-          <X onClick={onDismiss} className="mt-1" />
+          <X onClick={onDismiss} className="mt-1 cursor-pointer" />
         </div>
       </div>
       <br />
       <div className="flex flex-col pb-0">
-        <ToggleWrapper className="flex">
-          <ToggleOption onClick={() => setShowLists(!showLists)} active={showLists}>
+        <ToggleWrapper className="flex mb-4">
+          <div className={showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-blue-600 bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
             <span>Lists</span>
-          </ToggleOption>
-          <ToggleOption onClick={() => setShowLists(!showLists)} active={!showLists}>
+          </div>
+          <div className={!showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-blue-600 bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
             <span>Tokens</span>
-          </ToggleOption>
+          </div>
         </ToggleWrapper>
       </div>
       {showLists ? (

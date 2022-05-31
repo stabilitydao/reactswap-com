@@ -34,9 +34,9 @@ export function ImportToken(props: ImportProps) {
   return (
     <Wrapper>
       <div className="flex flex-col gap-3 w-full">
-        <div className="flex justify-between">
+        <div className="flex justify-between py-3 px-6">
           {onBack ? <ArrowLeft style={{ cursor: 'pointer' }} onClick={onBack} /> : <div />}
-          <div>
+          <div className="text-xl">
             {tokens.length} tokens
           </div>
           {onDismiss ? <X onClick={onDismiss} /> : <div />}
@@ -63,7 +63,7 @@ export function ImportToken(props: ImportProps) {
           }}
           className="px-8 py-3 rounded-lg .token-dismiss-button"
         >
-          <span>Import</span>
+          <button className="dark:bg-amber-700 w-full text-xl py-2 font-bold">Import</button>
         </button>
       </div>
     </Wrapper>

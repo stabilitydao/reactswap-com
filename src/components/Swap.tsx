@@ -218,6 +218,7 @@ function Swap() {
   const canSwap =
     inputCurrency
     && outputCurrency
+    && parsedAmount
     && !needToApprove
     && !pendingApproval
     && bestQuote

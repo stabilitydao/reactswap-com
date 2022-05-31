@@ -2,7 +2,7 @@ import { TokenList } from '@uniswap/token-lists'
 import ListLogo from '@/src/components/ListLogo'
 import { useFetchListCallback } from '@/src/hooks/useFetchListCallback'
 import { useCallback, useState } from 'react'
-import { AlertTriangle, ArrowLeft, X } from 'react-feather'
+import { ArrowLeft, X } from 'react-feather'
 import { useAppDispatch } from '@/src/state/store'
 import { enableList, removeList } from '@/src/state/lists/actions'
 import { useAllLists } from '@/src/state/lists/hooks'
@@ -25,9 +25,6 @@ interface ImportProps {
 
 export function ImportList({ listURL, list, setModalView, onDismiss }: ImportProps) {
   const dispatch = useAppDispatch()
-
-  // user must accept
-  const [confirmed, setConfirmed] = useState(false)
 
   const lists = useAllLists()
   const fetchList = useFetchListCallback()
@@ -56,22 +53,22 @@ export function ImportList({ listURL, list, setModalView, onDismiss }: ImportPro
   return (
     <Wrapper>
       <div className="flex flex-col gap-3 w-full">
-        <div className="flex justify-between">
+        <div className="flex justify-between  py-3 px-6">
           <ArrowLeft style={{ cursor: 'pointer' }} onClick={() => setModalView(CurrencyModalView.manage)} />
-          <div>
+          <div className="text-xl">
             <span>Import List</span>
           </div>
-          <X onClick={onDismiss} />
+          <X className="cursor-pointer" onClick={onDismiss} />
         </div>
       </div>
       <br />
       <div className="flex gap-2">
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-col px-5">
           <div className="flex bg-indigo-600 px-10 py-5">
             <div className="flex justify-between">
               <div className="flex">
                 {list.logoURI && <ListLogo logoURI={list.logoURI} size="40px" />}
-                <div className="flex gap-2 ml-5">
+                <div className="flex gap-2 ml-5 flex-col">
                   <div className="flex">
                     <div>
                       {list.name}
@@ -90,42 +87,9 @@ export function ImportList({ listURL, list, setModalView, onDismiss }: ImportPro
               </div>
             </div>
           </div>
-          <div className="flex">
-            <div className="flex justify-center text-center gap-5 mb-5">
-              <AlertTriangle stroke={'#ff0000'} size={32} />
-              <div>
-                <span>Import at your own risk</span>
-              </div>
-            </div>
-
-            <div className="flex text-center gap-3 mb-3">
-              <div>
-                <span>
-                  By adding this list you are implicitly trusting that the data is correct. Anyone can create a list,
-                  including creating fake versions of existing lists and lists that claim to represent projects that do
-                  not have one.
-                </span>
-              </div>
-              <div>
-                <span>If you purchase a token from this list, you may not be able to sell it back.</span>
-              </div>
-            </div>
-            <div className="flex justify-center cursor-pointer" onClick={() => setConfirmed(!confirmed)}>
-              <input
-                name="confirmed"
-                type="checkbox"
-                checked={confirmed}
-                onChange={() => setConfirmed(!confirmed)}
-              />
-              <div>
-                <span>I understand</span>
-              </div>
-            </div>
-          </div>
 
           <button
-            className="btn px-10 py-2 rounded-xl"
-            disabled={!confirmed}
+            className="btn px-10 py-2 rounded-xl dark:bg-amber-700 mt-10"
             onClick={handleAddList}
           >
             <span>Import</span>
@@ -136,7 +100,6 @@ export function ImportList({ listURL, list, setModalView, onDismiss }: ImportPro
             </div>
           ) : null}
         </div>
-        {/* </Card> */}
       </div>
     </Wrapper>
   )

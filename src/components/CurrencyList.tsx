@@ -226,9 +226,7 @@ export default function CurrencyList({
 
   const chainId = useChainId()
 
-  console.log('CurrencyList currencies', currencies?.map(c => c?.symbol))
-  console.log(currencies.length)
-
+  // console.log('CurrencyList currencies', currencies?.map(c => c?.symbol))
 
   const Row = useCallback(
     ({ data, index, style }: {data:any, index:any, style: any}) => {

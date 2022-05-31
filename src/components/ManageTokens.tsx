@@ -71,17 +71,17 @@ export default function ManageTokens({
       chainId &&
       userAddedTokens.map((token) => (
         <div className="w-full flex justify-between" key={token.address}>
-          <div className="flex">
-            <CurrencyLogo currency={token} size={'20px'} />
+          <div className="flex items-center">
+            <CurrencyLogo currency={token} size={'10'} />
             <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank" rel="noreferrer" >
               <div className="font-bold ml-2">
                 {token.symbol}
               </div>
             </a>
           </div>
-          <div className="flex">
-            <BiTrash onClick={() => removeToken(chainId, token.address)} />
-            <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} >
+          <div className="flex items-center text-xl">
+            <BiTrash title="Remove" className="cursor-pointer" onClick={() => removeToken(chainId, token.address)} />
+            <a className="ml-3" title="Go to explorer" href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)}  target="_blank" rel="noreferrer" >
               <BiFastForward />
             </a>
           </div>
@@ -92,10 +92,11 @@ export default function ManageTokens({
 
   return (
     <Wrapper>
-      <div className="w-full h-full flex">
+      <div className="w-full h-full flex flex-col px-4">
         <div className="flex flex-col gap-2">
           <div className="flex">
             <input
+              className="w-full  px-3 text-xl"
               type="text"
               id="token-search-input"
               placeholder={'0x0000'}
@@ -128,7 +129,7 @@ export default function ManageTokens({
               <span>{userAddedTokens?.length} Custom Tokens</span>
             </div>
             {userAddedTokens.length > 0 && (
-              <button onClick={handleRemoveAll}>
+              <button className="cursor-pointer" onClick={handleRemoveAll}>
                 <div>
                   <span>Clear all</span>
                 </div>

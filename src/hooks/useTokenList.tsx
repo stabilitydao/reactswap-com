@@ -1,5 +1,5 @@
 import { Currency, CurrencyAmount, NativeCurrency, Token } from '@uniswap/sdk-core'
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
 import { TokenInfo, TokenList } from '@uniswap/token-lists'
 import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
 import { useSelector } from 'react-redux'
@@ -35,19 +35,14 @@ export function useTokenMap(): TokenMap {
   const chainId = useSelector(selectChainId)
   const chainTokenMap = useChainTokenMapContext()
   const tokenMap = chainId && chainTokenMap?.[chainId]
-  /*return useMemo(() => {
+  return useMemo(() => {
     if (!tokenMap) return {}
-    console.log('Object.entries(tokenMap)', Object.entries(tokenMap))
+    // console.log('Object.entries(tokenMap)', Object.entries(tokenMap))
     return Object.entries(tokenMap).reduce((map, [address, { token }]) => {
       map[address] = token
       return map
     }, {} as TokenMap)
-  }, [tokenMap])*/
-  if (!tokenMap) return {}
-  return Object.entries(tokenMap).reduce((map, [address, { token }]) => {
-    map[address] = token
-    return map
-  }, {} as TokenMap)
+  }, [tokenMap])
 }
 
 

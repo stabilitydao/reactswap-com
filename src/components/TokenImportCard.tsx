@@ -4,40 +4,30 @@ import CurrencyLogo from '@/src/components/CurrencyLogo'
 import ListLogo from '@/src/components/ListLogo'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { AlertCircle } from 'react-feather'
-import styled, { useTheme } from 'styled-components'
 import { ExplorerDataType, getExplorerLink } from '@/src/utils/getExplorerLink'
 
-const AddressText = styled.div`
-  color: blue;
-  font-size: 12px;
-  word-break: break-all;
-
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    font-size: 10px;
-  `}
-`
 interface TokenImportCardProps {
   list?: TokenList
   token: Token
 }
+
 const TokenImportCard = ({ list, token }: TokenImportCardProps) => {
-  const theme = useTheme()
   const { chainId } = useActiveWeb3React()
   return (
     <div className="bg-indigo-600 p-5">
       <div className="flex flex-col justify-center gap-3">
         <CurrencyLogo currency={token} size={'32px'} />
         <div className="flex flex-col gap-3 justify-center">
-          <div>
+          <div className="text-2xl font-bold">
             {token.symbol}
           </div>
-          <div>
+          <div className="text-2xl">
             {token.name}
           </div>
         </div>
         {chainId && (
-          <a href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank" rel="noreferrer">
-            <AddressText>{token.address}</AddressText>
+          <a className="dark:text-blue-300 " href={getExplorerLink(chainId, token.address, ExplorerDataType.ADDRESS)} target="_blank" rel="noreferrer">
+            <span className="text-sm">{token.address}</span>
           </a>
         )}
         {list !== undefined ? (

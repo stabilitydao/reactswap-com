@@ -56,7 +56,7 @@ export default function ImportRow({
 
   return (
     <TokenSection style={style}>
-      <CurrencyLogo currency={token} size={'24px'} style={{ opacity: dim ? '0.6' : '1' }} />
+      <CurrencyLogo currency={token} size={'12'} style={{ opacity: dim ? '0.6' : '1' }} />
       <div className="flex flex-col gap-2"  style={{ opacity: dim ? '0.6' : '1' }}>
         <div className="flex">
           <span>{token.symbol}</span>
