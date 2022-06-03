@@ -72,7 +72,7 @@ export default function CurrencyInputPanel({
         <div className="w-1 h-10"> </div>
         {field === Field.INPUT ? (
           <input
-            className="w-40 h-12 text-2xl mt-0.5 text-right p-3"
+            className="w-48 h-12 text-2xl mt-0.5 text-right p-3"
             value={value}
             onChange={(event) => {
               enforcer(event.target.value.replace(/,/g, '.'))
@@ -89,7 +89,7 @@ export default function CurrencyInputPanel({
             spellCheck="false"
           />
         ) : (
-          <div className="mt-1 flex justify-end items-center border-2 dark:border-gray-500 w-40 h-12  text-2xl  text-right p-3">{value && parseFloat(value) > 0 && currency ? value : null}</div>
+          <div className="mt-1 flex justify-end items-center border-2 dark:border-gray-500 w-48 h-12  text-2xl  text-right p-3">{value && parseFloat(value) > 0 && currency ? value : null}</div>
         )}
         {account ? (
           <div style={{ height: '17px' }} className="text-right pr-3">

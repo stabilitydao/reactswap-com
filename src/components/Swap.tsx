@@ -14,6 +14,7 @@ import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { TransactionResponse } from '@ethersproject/providers'
 import Loader from '@/components/Loader'
+import { ArrowDown } from 'react-feather'
 
 function Swap() {
   // console.log('Swap render')
@@ -325,9 +326,21 @@ function Swap() {
             onMax={handleMaxInput}
           />
         </div>
-        <div className="h-20"></div>
+        <div className="h-20 flex justify-center items-center">
+          <div title="Switch tokens">
+            <ArrowDown
+              className="cursor-pointer"
+              size="24"
+              onClick={() => {
+                setQuotes({})
+                onSwitchTokens()
+              }}
+              color={'#00bdec'}
+            />
+          </div>
+        </div>
         <div className="flex flex-col">
-          <div className="flex text-sm pl-2">You receive</div>
+          <div className="flex text-sm pl-2">You buy</div>
           <CurrencyInputPanel
             field={Field.OUTPUT}
             value={bestQuote && bestQuote.outputAmountFixed ? bestQuote.outputAmountFixed : '0'}

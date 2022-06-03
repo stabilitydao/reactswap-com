@@ -17,7 +17,7 @@ export const swapSlice = createSlice({
   initialState,
   reducers: {
     selectCurrency: (state, {payload: {field, currencyId},}) => {
-      console.log('selectCurrency')
+      // console.log('selectCurrency')
       if (field == Field.INPUT) {
         state.inputCurrencyId = currencyId
       } else {
@@ -33,11 +33,10 @@ export const swapSlice = createSlice({
       state.outputCurrencyId = outputCurrency
     },
     switchCurrencies: (state) => {
-      state = {
-        inputCurrencyId: state.outputCurrencyId,
-        outputCurrencyId: state.inputCurrencyId,
-        inputValue: state.inputValue,
-      }
+      const oldInputCurrency = state.inputCurrencyId
+      state.inputCurrencyId = state.outputCurrencyId
+      state.outputCurrencyId = oldInputCurrency
+      state.inputValue = ''
     },
   },
 })

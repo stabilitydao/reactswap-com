@@ -8,13 +8,12 @@ import { useAllLists } from './hooks'
 
 import { acceptListUpdate, enableList } from './actions'
 import { useActiveListUrls } from './hooks'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/src/state/store'
+import { useAppDispatch } from '@/src/state/store'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 
 export default function Updater(): null {
   const { library } = useActiveWeb3React()
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useAppDispatch()
   const isWindowVisible = useIsWindowVisible()
 
   // get all loaded lists, and the active urls
