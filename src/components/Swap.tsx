@@ -146,6 +146,9 @@ function Swap() {
   // console.log('Approval state:', approval)
 
   useEffect(() => {
+    if (approval === ApprovalState.NOT_APPROVED) {
+      setApproved(false)
+    }
     if (approval === ApprovalState.PENDING) {
       setPendingApproval(true)
     }
@@ -358,7 +361,7 @@ function Swap() {
           )}
           {pendingApproval && (
             <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
-              <span>pending approval</span>
+              <span className="mr-4">pending approval</span>
               <Loader stroke="#ffffff"/>
             </div>
           )}
