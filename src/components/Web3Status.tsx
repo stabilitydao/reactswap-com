@@ -51,7 +51,7 @@ export default function Web3Status() {
           <div className="flex flex-col w-full">
             <div className="flex justify-center text-lg text-center w-full py-3">Choose your wallet</div>
             <div className="flex w-full items-center justify-center flex-col">
-              <button className="flex btn bg-amber-700 px-5" onClick={connect}>Metamask</button>
+              <button className="flex btn bg-amber-700 px-5 text-xl" onClick={connect}>Metamask / browser wallet</button>
             </div>
           </div>
         )}

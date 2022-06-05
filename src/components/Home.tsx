@@ -9,7 +9,7 @@ function Home() {
       style={{ minHeight: 'calc(100vh - 64px)' }}
     >
       <div className="flex container flex-col items-center px-5 py-10">
-        <div className="text-4xl mt-8 mb-5">MVP-1: Swap at the best price</div>
+        <div className="text-3xl mt-8 mb-5">MVP-1 v0: Swap at the best price</div>
 
         <TokenListProvider>
           <Swap />
