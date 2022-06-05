@@ -142,12 +142,6 @@ export function useCurrencyFromMap(tokens: TokenMap, currencyId?: string | null)
 export default function useCurrency(currencyId?: string | null): Currency | undefined {
   const tokens = useTokenMap()
   return useCurrencyFromMap(tokens, currencyId)
-
-  /*const chainId = useChainId()
-  const isNative = currencyId?.toUpperCase() === 'ETH'
-  const token = useToken(isNative ? undefined : currencyId)
-  return isNative ? native[chainId] : token*/
-
 }
 
 // Check if currency is included in custom list from user storage

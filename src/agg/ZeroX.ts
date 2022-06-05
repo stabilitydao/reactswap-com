@@ -23,12 +23,12 @@ export class ZeroX implements SwapAggregator {
     return swapQuote?.allowanceTarget
   }
 
-  async getQuote(token0: Currency, token1: Currency, amount: CurrencyAmount<Currency>, from?: string): Promise<SwapQuote> {
+  async getQuote(token0: Currency, token1: Currency, amount: CurrencyAmount<Currency>, slippage?: number, from?: string): Promise<SwapQuote> {
     const params = {
       sellToken: token0.isToken ? token0.address : token0.symbol,
       buyToken: token1.isToken ? token1.address : token1.symbol,
       sellAmount: amount.quotient.toString(),
-      slippagePercentage: 0.05,
+      slippagePercentage: slippage ? (slippage / 100) : 0.03,
       // ...(from ? {takerAddress: from,} : {}),
       buyTokenPercentageFee: parseFloat(fee) / 100,
       feeRecipient: feeReceiver[this.chainId],

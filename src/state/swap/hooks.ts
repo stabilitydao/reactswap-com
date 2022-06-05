@@ -4,7 +4,7 @@ import { inputType, replaceSwapState, selectCurrency, SwapState, switchCurrencie
 import { TOKEN_SHORTHANDS } from '../../constants/currencies'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, AppState, useAppDispatch } from '@/src/state/store'
-import { ReactNode, useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import useParsedQueryString from '@/src/hooks/useParsedQueryString'
 import { Field } from '@/src/state/swap/actions'
 import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
@@ -23,17 +23,8 @@ export function useDerivedSwapInfo(): {
   outputCurrency?: Currency
   inputBalance?: CurrencyAmount<Currency>
   outputBalance?: CurrencyAmount<Currency>
-  // currencies: { [field in Field]?: Currency | null }
-  // currencyBalances: { [field in Field]?: CurrencyAmount<Currency> }
   parsedAmount?: CurrencyAmount<Currency>
-  // inputError?: ReactNode
-  /*trade: {
-    trade: InterfaceTrade<Currency, Currency, TradeType> | undefined
-    state: TradeState
-  }*/
   allowedSlippage: Percent
-
-  // outputAmount?: string
 } {
   const { account } = useActiveWeb3React()
 
@@ -48,69 +39,16 @@ export function useDerivedSwapInfo(): {
 
   const relevantTokenBalances = useCurrencyBalances(
     account ?? undefined,
-    [
-      inputCurrency ?? undefined,
-      outputCurrency ?? undefined,
-    ]
+    useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrencyId, outputCurrencyId])
   )
-
-  const parsedAmount = tryParseCurrencyAmount(inputValue, inputCurrency ?? undefined)
-
-  /*
-
-  /*const trade = useBestTrade(
-    isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
-    parsedAmount,
-    (isExactIn ? outputCurrency : inputCurrency) ?? undefined
-  )*/
-
-  const currencyBalances = useMemo(
-    () => ({
-      [Field.INPUT]: relevantTokenBalances[0],
-      [Field.OUTPUT]: relevantTokenBalances[1],
-    }),
-    [relevantTokenBalances]
+  const parsedAmount = useMemo(
+    () => tryParseCurrencyAmount(inputValue, inputCurrency ?? undefined),
+    [inputCurrencyId, true, outputCurrencyId, inputValue]
   )
-
-  /*const currencies: { [field in Field]?: Currency | null } = useMemo(
-    () => ({
-      [Field.INPUT]: inputCurrency,
-      [Field.OUTPUT]: outputCurrency,
-    }),
-    [inputCurrency, outputCurrency]
-  )*/
 
   // allowed slippage is either default or custom user defined slippage
-  const allowedSlippage = new Percent(50, 10_000)// useUserSlippageToleranceWithDefault(new Percent(50, 10_000)) // .50%
+  const allowedSlippage = useUserSlippageToleranceWithDefault(new Percent(50, 10_000)) // .50%
 
-  /*
-  const inputError = useMemo(() => {
-    let inputError: string | undefined
-
-    if (!account) {
-      inputError = 'Connect Wallet'
-    }
-
-    if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {
-      inputError = inputError ?? 'Select a token'
-    }
-
-    if (!parsedAmount) {
-      inputError = inputError ?? 'Enter an amount'
-    }
-
-    // compare input balance to max input based on version
-    const [balanceIn, amountIn] = [currencyBalances[Field.INPUT], trade.trade?.maximumAmountIn(allowedSlippage)]
-
-    if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-      inputError = `Insufficient ${amountIn.currency.symbol} balance`
-    }
-
-    return inputError
-  }, [account, allowedSlippage, currencies, currencyBalances, parsedAmount, to, trade.trade])
-*/
-
-  // console.log('useDerivedSwapInfo')
   return useMemo(
     () => ({
       inputCurrency,
@@ -118,12 +56,9 @@ export function useDerivedSwapInfo(): {
       inputBalance: relevantTokenBalances[0],
       outputBalance: relevantTokenBalances[1],
       parsedAmount,
-      // inputError,
-      // trade,
       allowedSlippage,
-      // outputAmount,
     }),
-    [allowedSlippage, inputCurrency, outputCurrency, inputValue]
+    [allowedSlippage, inputCurrency, outputCurrency, inputValue, relevantTokenBalances[0]?.quotient.toString()]
   )
 }
 

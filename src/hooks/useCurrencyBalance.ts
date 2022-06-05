@@ -117,21 +117,17 @@ export function useTokenBalance(account?: string, token?: Token): CurrencyAmount
 }
 
 export function useCurrencyBalances(
-  account?: string,
+  account?: string|null,
   currencies?: (Currency | undefined)[]
 ): (CurrencyAmount<Currency> | undefined)[] {
-  /*if (account) {
-    console.log('useCurrencyBalances currencies', currencies?.map(c => c?.symbol))
-  }*/
-
   const tokens = useMemo(
     () => currencies?.filter((currency): currency is Token => currency?.isToken ?? false) ?? [],
     [currencies]
   )
 
-  const tokenBalances = useTokenBalances(account, tokens)
+  const tokenBalances = useTokenBalances(account ?? undefined, tokens)
   const containsETH: boolean = useMemo(() => currencies?.some((currency) => currency?.isNative) ?? false, [currencies])
-  const ethBalance = useNativeCurrencyBalances(useMemo(() => (containsETH ? [account] : []), [containsETH, account]))
+  const ethBalance = useNativeCurrencyBalances(useMemo(() => (containsETH ? [account??undefined] : []), [containsETH, account]))
 
   return useMemo(
     () =>

@@ -15,6 +15,7 @@ export interface SwapAggregator {
     token0: Currency,
     token1: Currency,
     amount: CurrencyAmount<Currency>,
+    slippage?: number,
     from?: string
   ): Promise<SwapQuote>;
   buildTx(

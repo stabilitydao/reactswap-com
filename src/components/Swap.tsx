@@ -1,6 +1,6 @@
 import { useDerivedSwapInfo, useSwapActionHandlers, useSwapState } from '@/src/state/swap/hooks'
 import { useChainId } from '@/src/state/network/hooks'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Percent, Rounding } from '@uniswap/sdk-core'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Field } from '@/src/state/swap/actions'
 import CurrencyInputPanel from '@/components/CurrencyInputPanel'
@@ -15,6 +15,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { TransactionResponse } from '@ethersproject/providers'
 import Loader from '@/components/Loader'
 import { ArrowDown } from 'react-feather'
+import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 
 function Swap() {
   // console.log('Swap render')
@@ -61,12 +62,14 @@ function Swap() {
   const { inputValue, inputCurrencyId, outputCurrencyId } = useSwapState()
 
   const {
-    // allowedSlippage,
+    allowedSlippage,
     parsedAmount,
     inputCurrency,
     outputCurrency,
     inputBalance,
   } = useDerivedSwapInfo()
+
+  // console.log('allowedSlippage', allowedSlippage.toFixed())
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = useMemo(
     () => maxAmountSpend(inputBalance),
@@ -84,9 +87,10 @@ function Swap() {
             inputCurrency,
             outputCurrency,
             parsedAmount,
+            parseFloat(allowedSlippage.toFixed(2)),
             account ?? undefined
           ).then(quote => {
-            // console.log(`${aggId} reply quote data:`, quote)
+            console.log(`${aggId} reply quote data:`, quote)
             if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
               if (isSubscribed) {
                 setQuotes(q => ({...q, [aggId]: quote}))
@@ -100,9 +104,10 @@ function Swap() {
     return () => {isSubscribed = false}
   }, [
     chainId,
-    inputCurrency,
-    outputCurrency,
-    parsedAmount?.quotient.toString()
+    inputCurrencyId,
+    outputCurrencyId,
+    parsedAmount?.quotient.toString(),
+    allowedSlippage
   ])
 
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
@@ -131,7 +136,7 @@ function Swap() {
     if (bestQuote && inputCurrency?.isNative === false) {
       aggregators[chainId][bestQuote.protocolId].getAllowanceTarget(bestQuote).then(t => {
         setAllowanceTarget(t)
-        console.log('AllowanceTarget:', allowanceTarget)
+        // console.log('AllowanceTarget:', allowanceTarget)
       })
     }
   }, [chainId, bestQuote])
@@ -174,11 +179,11 @@ function Swap() {
   useEffect(() => {
     let isSubscribed = true
     const getTxData = async () => {
+      // console.debug('getTxData', account, inputCurrency, parsedAmount, outputCurrency, inputBalance?.greaterThan(JSBI.BigInt(0)), !needToApprove, bestQuote, !insufficientBalance)
       if (
         account
         && inputCurrency
         && parsedAmount
-        && (allowanceTarget || inputCurrency.isNative)
         && outputCurrency
         && inputBalance?.greaterThan(JSBI.BigInt(0))
         && !needToApprove
@@ -186,22 +191,23 @@ function Swap() {
         && !insufficientBalance
       ) {
         const aggId = bestQuote.protocolId
-        console.log('Buildtx await')
+        console.log(`Buildtx ${aggId} await`)
         const txData =  await aggregators[chainId][aggId].buildTx(
           inputCurrency,
           outputCurrency,
           parsedAmount,
           account,
           bestQuote.to,
-          bestQuote
+          bestQuote,
+          parseFloat(allowedSlippage.toFixed(2))
         )
-        console.log('Buildtx setTxData')
+        // console.log('Buildtx setTxData')
         if (isSubscribed) {
           setTxData(txData)
         }
-      }/* else {
+      } else {
         setTxData(undefined)
-      }*/
+      }
     }
 
     getTxData()
@@ -210,11 +216,11 @@ function Swap() {
     chainId,
     inputBalance?.quotient.toString(),
     parsedAmount?.quotient.toString(),
-    bestQuote,
+    bestQuote?.outputAmount,
     needToApprove,
-    allowanceTarget,
     account,
-    insufficientBalance
+    insufficientBalance,
+    allowedSlippage.quotient.toString()
   ])
 
   // console.log('Swap tx:', txData)
@@ -270,7 +276,7 @@ function Swap() {
 
     if (res) {
       res.response.wait(1).then(() => {
-        console.log('approval tx confirmed')
+        // console.log('approval tx confirmed')
         setPendingApproval(false)
         setApproved(true)
       })
@@ -281,7 +287,7 @@ function Swap() {
   ])
 
   const handleSwap = useCallback(async () => {
-    console.log('handle Swap')
+    // console.log('handle Swap')
     if (library && txData && !needToApprove) {
       library
         .getSigner()
@@ -292,6 +298,9 @@ function Swap() {
           response.wait(1).then(() => {
             setPendingSwap(false)
             onUserInput('')
+          }).catch(() => {
+            setPendingSwap(false)
+            console.log('swap failed')
           })
           // return response
         })
@@ -313,6 +322,33 @@ function Swap() {
     bestQuote,
     txData
   ])
+
+  // const userSlippageTolerance = useUserSlippageTolerance()
+  const setUserSlippageTolerance = useSetUserSlippageTolerance()
+  const [slippageInput, setSlippageInput] = useState(allowedSlippage.toFixed(1))
+  const [slippageError, setSlippageError] = useState<'invalid input' | false>(false)
+
+  function parseSlippageInput(value: string) {
+
+    // populate what the user typed and clear the error
+    setSlippageInput(value)
+    setSlippageError(false)
+
+    if (value.length === 0) {
+      setUserSlippageTolerance('auto')
+    } else {
+      const parsed = Math.floor(Number.parseFloat(value) * 100)
+
+      if (!Number.isInteger(parsed) || parsed < 0 || parsed > 5000) {
+        setUserSlippageTolerance('auto')
+        if (value !== '.') {
+          setSlippageError('invalid input')
+        }
+      } else {
+        setUserSlippageTolerance(new Percent(parsed, 10_000))
+      }
+    }
+  }
 
   return (
     <div className="flex container max-w-4xl mt-5 mb-10">
@@ -352,6 +388,24 @@ function Swap() {
             otherCurrency={inputCurrency}
           />
         </div>
+
+        {canSwap &&
+          <div className="flex justify-start my-6 items-center">
+            <div className="flex w-44 justify-end mr-5">max slippage</div>
+            <div>
+              <input
+                style={{
+                  border: slippageError ? '2px solid red' : '2px solid transparent',
+                  backgroundColor: slippageError ? '#ff0000' : '',
+                }}
+                onChange={(e) => parseSlippageInput(e.target.value)}
+                className="w-12 py-1 px-2 text-right"
+                value={slippageInput}
+              /> %
+            </div>
+          </div>
+        }
+
         <div className="flex mt-10">
           {insufficientBalance && (
             <div className="dark:text-red-200 text-xl font-bold">Insuffucient balance</div>
