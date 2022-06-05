@@ -8,6 +8,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <Head>
           <title>ReactSwap</title>
           <meta name="description" content="ReactSwap decentralized exchange" />
+          <link rel="shortcut icon" type="image/png" href="/img/react.png" />
         </Head>
         <div className="from-violet-500 to-red-300 bg-gradient-to-tr dark:from-violet-900 dark:via-black dark:to-red-900 font-Roboto dark:text-white dark:bg-teal-900">
           <Navbar />
