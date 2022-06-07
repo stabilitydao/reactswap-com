@@ -291,13 +291,13 @@ function Swap() {
       && txData.to
       && txData.data
       && !needToApprove
-      && inputCurrencyId
-      && outputCurrencyId
+      && inputCurrency
+      && outputCurrency
       && parsedAmount
     ) {
       metarouterContract?.swap(
-        inputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inputCurrencyId,
-        outputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outputCurrencyId,
+        inputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inputCurrency.address,
+        outputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outputCurrency.address,
         BigInt(parsedAmount.quotient.toString()),
         txData.to,
         txData.data,
@@ -324,8 +324,8 @@ function Swap() {
   }, [
     bestQuote,
     txData,
-    inputCurrencyId,
-    outputCurrencyId
+    inputCurrency?.symbol,
+    outputCurrency?.symbol
   ])
 
   // const userSlippageTolerance = useUserSlippageTolerance()
