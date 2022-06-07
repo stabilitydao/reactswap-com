@@ -5,7 +5,6 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import axios from "axios";
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { fee, feeReceiver } from '@/src/constants/fees'
 
 export class ZeroX implements SwapAggregator {
   id: AggregatorId = AggregatorId.ZeroX
@@ -30,8 +29,6 @@ export class ZeroX implements SwapAggregator {
       sellAmount: amount.quotient.toString(),
       slippagePercentage: slippage ? (slippage / 100) : 0.03,
       // ...(from ? {takerAddress: from,} : {}),
-      buyTokenPercentageFee: parseFloat(fee) / 100,
-      feeRecipient: feeReceiver[this.chainId],
     }
 
     const url = `${this.apiEndpoint}quote`
@@ -82,11 +79,9 @@ export class ZeroX implements SwapAggregator {
     }
 
     return {
-      from,
-      to: swapQuote.to,
+      to: swapQuote.to, // whitelisted router in metarouter
       data: swapQuote.data,
       ...(swapQuote.gasPrice ? {gasPrice: BigInt(swapQuote.gasPrice.toString())} : {}),
-      // ...(swapQuote.gas ? {gasLimit: BigInt(swapQuote.gas.toString())} : {}),
       ...(swapQuote.value && swapQuote.value > 0 ? {value: BigInt(swapQuote.value.toString())} : {}),
     }
   }

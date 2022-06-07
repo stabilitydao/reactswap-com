@@ -41,7 +41,7 @@ export function useAllLists(): AppState['lists']['byUrl'] {
 export function combineMaps(map1: TokenAddressMap, map2: TokenAddressMap): TokenAddressMap {
   return {
     [ChainId.POLYGON]: { ...map1[ChainId.POLYGON], ...map2[ChainId.POLYGON] },
-    [ChainId.MUMBAI]: { ...map1[ChainId.MUMBAI], ...map2[ChainId.MUMBAI] },
+    // [ChainId.MUMBAI]: { ...map1[ChainId.MUMBAI], ...map2[ChainId.MUMBAI] },
   }
 }
 

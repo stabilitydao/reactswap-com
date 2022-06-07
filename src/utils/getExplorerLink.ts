@@ -8,7 +8,7 @@ const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
   // [SupportedChainId.KOVAN]: 'https://kovan.etherscan.io',
   // [SupportedChainId.OPTIMISM]: 'https://optimistic.etherscan.io',
   // [SupportedChainId.OPTIMISTIC_KOVAN]: 'https://kovan-optimistic.etherscan.io',
-  [ChainId.MUMBAI]: 'https://mumbai.polygonscan.com',
+  // [ChainId.MUMBAI]: 'https://mumbai.polygonscan.com',
   [ChainId.POLYGON]: 'https://polygonscan.com',
 }
 

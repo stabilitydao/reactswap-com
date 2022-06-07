@@ -5,9 +5,10 @@ import { getContract } from '@/src/utils'
 import ERC20_ABI from '@/src/abis/erc20.json'
 import ERC20_BYTES32_ABI from '@/src/abis/erc20_bytes32.json'
 import MULTICALL_ABI from '@/src/abis/multicall.json'
-import { Erc20, Multicall } from '@/src/abis/types'
+import METAROUTER_ABI from '@/src/abis/metarouter.json'
+import { Erc20, Metarouter, Multicall } from '@/src/abis/types'
 import { useChainId } from '@/src/state/network/hooks'
-import { multicall } from '@/src/constants/contracts'
+import { metarouter, multicall } from '@/src/constants/contracts'
 
 // returns null on errors
 function useContract<T extends Contract = Contract>(
@@ -40,4 +41,10 @@ export function useMulticallContract() {
   const chainId = useChainId()
   const multicallAddress = multicall[chainId]
   return useContract<Multicall>(multicallAddress, MULTICALL_ABI, false)
+}
+
+export function useMetaRouterContract() {
+  const chainId = useChainId()
+  const contractAddress = metarouter[chainId]
+  return useContract<Metarouter>(contractAddress, METAROUTER_ABI, true)
 }

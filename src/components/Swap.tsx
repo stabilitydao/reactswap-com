@@ -1,6 +1,6 @@
 import { useDerivedSwapInfo, useSwapActionHandlers, useSwapState } from '@/src/state/swap/hooks'
 import { useChainId } from '@/src/state/network/hooks'
-import { Currency, CurrencyAmount, Percent, Rounding } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Percent} from '@uniswap/sdk-core'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Field } from '@/src/state/swap/actions'
 import CurrencyInputPanel from '@/components/CurrencyInputPanel'
@@ -16,6 +16,8 @@ import { TransactionResponse } from '@ethersproject/providers'
 import Loader from '@/components/Loader'
 import { ArrowDown } from 'react-feather'
 import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
+import { metarouter } from '@/src/constants/contracts'
+import { useMetaRouterContract } from '@/src/hooks/useContract'
 
 function Swap() {
   // console.log('Swap render')
@@ -24,7 +26,7 @@ function Swap() {
   // const loadedUrlParams = useDefaultsFromURLSearch(chainId)
 
   const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
-  const [allowanceTarget, setAllowanceTarget] = useState<string|undefined>()
+  const allowanceTarget:string = metarouter[chainId]
   const [pendingApproval, setPendingApproval] = useState<boolean>(false)
   const [approved, setApproved] = useState<boolean>(false)
   const [txData, setTxData] = useState<TransactionRequest|undefined>()
@@ -132,15 +134,6 @@ function Swap() {
   // console.log('Quotes:', quotes)
   // console.log('BestQuote:', bestQuote)
 
-  useEffect(() => {
-    if (bestQuote && inputCurrency?.isNative === false) {
-      aggregators[chainId][bestQuote.protocolId].getAllowanceTarget(bestQuote).then(t => {
-        setAllowanceTarget(t)
-        // console.log('AllowanceTarget:', allowanceTarget)
-      })
-    }
-  }, [chainId, bestQuote])
-
   // check balance
   const insufficientBalance =
     inputBalance && parsedAmount?.greaterThan(inputBalance)
@@ -166,7 +159,6 @@ function Swap() {
   const needToApprove =
     inputCurrency
     && outputCurrency
-    && allowanceTarget
     && parsedAmount
     && !insufficientBalance
     && !pendingApproval
@@ -196,7 +188,7 @@ function Swap() {
           inputCurrency,
           outputCurrency,
           parsedAmount,
-          account,
+          allowanceTarget,
           bestQuote.to,
           bestQuote,
           parseFloat(allowedSlippage.toFixed(2))
@@ -286,41 +278,43 @@ function Swap() {
     bestQuote
   ])
 
+  const metarouterContract = useMetaRouterContract()
+
   const handleSwap = useCallback(async () => {
     // console.log('handle Swap')
-    if (library && txData && !needToApprove) {
-      library
-        .getSigner()
-        .sendTransaction(txData)
-        .then((response) => {
-          setPendingSwap(true)
-          // console.log(response)
-          response.wait(1).then(() => {
-            setPendingSwap(false)
-            onUserInput('')
-          }).catch(() => {
-            setPendingSwap(false)
-            console.log('swap failed')
-          })
-          // return response
-        })
-        .catch((error) => {
+    if (library && txData && !needToApprove && inputCurrencyId && outputCurrencyId && parsedAmount) {
+      metarouterContract?.swap(
+        inputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inputCurrencyId,
+        outputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outputCurrencyId,
+        BigInt(parsedAmount.quotient.toString()),
+        // @ts-ignore
+        txData.to,
+        txData.data,
+        {
+          value: txData.value,
+        }
+      ).then((response) => {
+        setPendingSwap(true)
+        onUserInput('')
+
+        response.wait(1).then(() => {
           setPendingSwap(false)
-          // if the user rejected the tx, pass this along
-          if (error?.code === 4001) {
-            throw new Error(`Transaction rejected.`)
-          } else {
-            // otherwise, the error was unexpected and we need to convey that
-            console.error(`Swap failed`, error)
-            console.debug('txData: ', txData)
-            console.debug('bestQuote: ', bestQuote)
-            throw new Error(`Swap failed`)
-          }
+          onUserInput('')
+        }).catch(() => {
+          setPendingSwap(false)
+          console.log('swap failed')
         })
+      }).catch((error) => {
+        setPendingSwap(false)
+        console.error(`Swap failed`, error)
+        throw new Error(`Swap failed`)
+      })
     }
   }, [
     bestQuote,
-    txData
+    txData,
+    inputCurrencyId,
+    outputCurrencyId
   ])
 
   // const userSlippageTolerance = useUserSlippageTolerance()
@@ -411,7 +405,7 @@ function Swap() {
             <div className="dark:text-red-200 text-xl font-bold">Insuffucient balance</div>
           )}
           {needToApprove && (
-            <button className="w-full dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve {bestQuote?.protocolId} router</button>
+            <button className="w-full dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
           )}
           {pendingApproval && (
             <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">

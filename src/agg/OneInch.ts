@@ -5,7 +5,6 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import axios from "axios";
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { fee, feeReceiver } from '@/src/constants/fees'
 
 export class OneInch implements SwapAggregator {
   id: AggregatorId = AggregatorId.OneInch
@@ -57,7 +56,6 @@ export class OneInch implements SwapAggregator {
       fromTokenAddress: token0.isToken ? token0.address : '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
       toTokenAddress: token1.isToken ? token1.address : '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
       amount: amount.quotient.toString(),
-      fee,
     }
 
     const url = `${this.apiEndpoint}quote`
@@ -124,8 +122,7 @@ export class OneInch implements SwapAggregator {
       amount: amount.quotient.toString(),
       fromAddress: from,
       slippage: slippage ?? 2,
-      fee,
-      referrerAddress: feeReceiver[this.chainId],
+      disableEstimate: true,
     }
 
     const url = `${this.apiEndpoint}swap`
@@ -139,7 +136,7 @@ export class OneInch implements SwapAggregator {
 
       return {
         from,
-        to: data.tx.to,
+        to: data.tx.to, // whitelisted router in metarouter
         value: BigInt(data.tx.value),
         data: data.tx.data,
         gasLimit: BigInt(data.tx.gas),

@@ -5,8 +5,8 @@ export const networks: {[chainId: number]: {name: string, rpc: string,}} = {
     name: 'Polygon',
     rpc: process.env.NEXT_PUBLIC_RPC_POLYGON ?? `https://polygon-rpc.com`,
   },
-  [ChainId.MUMBAI]: {
+  /*[ChainId.MUMBAI]: {
     name: 'Mumbai testnet',
     rpc: process.env.NEXT_PUBLIC_RPC_MUMBAI ?? `https://rpc-mumbai.matic.today`,
-  }
+  }*/
 }
