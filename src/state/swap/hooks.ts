@@ -37,13 +37,16 @@ export function useDerivedSwapInfo(): {
   const inputCurrency = useCurrency(inputCurrencyId)
   const outputCurrency = useCurrency(outputCurrencyId)
 
+  // console.debug('useDerivedSwapInfo() account:', account)
   const relevantTokenBalances = useCurrencyBalances(
     account ?? undefined,
-    useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrencyId, outputCurrencyId])
+    useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrencyId, outputCurrencyId, account])
   )
+  // console.debug('useDerivedSwapInfo() relevantTokenBalance[0]:', relevantTokenBalances[0])
+
   const parsedAmount = useMemo(
     () => tryParseCurrencyAmount(inputValue, inputCurrency ?? undefined),
-    [inputCurrencyId, true, outputCurrencyId, inputValue]
+    [inputCurrency?.symbol, true, outputCurrencyId, inputValue]
   )
 
   // allowed slippage is either default or custom user defined slippage
@@ -58,7 +61,7 @@ export function useDerivedSwapInfo(): {
       parsedAmount,
       allowedSlippage,
     }),
-    [allowedSlippage, inputCurrency, outputCurrency, inputValue, relevantTokenBalances[0]?.quotient.toString()]
+    [allowedSlippage, inputCurrency, outputCurrency, inputValue, relevantTokenBalances[0]?.quotient.toString(), account]
   )
 }
 
@@ -82,11 +85,13 @@ function parseTokenAmountURLParameter(urlParam: any): string {
 export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
   let inputCurrency = parseCurrencyFromURLParameter(parsedQs.inputCurrency)
   let outputCurrency = parseCurrencyFromURLParameter(parsedQs.outputCurrency)
-  const inputValue = parseTokenAmountURLParameter(parsedQs.exactAmount)
+  let inputValue = parseTokenAmountURLParameter(parsedQs.exactAmount)
 
   if (inputCurrency === '' && outputCurrency === '' && inputValue === '') {
     // Defaults to having the native currency selected
-    inputCurrency = 'ETH'
+    inputCurrency = 'WBTC'
+    outputCurrency = 'DAI'
+    inputValue = '1'
   } else if (inputCurrency === outputCurrency) {
     // clear output if identical
     outputCurrency = ''

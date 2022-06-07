@@ -71,6 +71,7 @@ function Swap() {
     inputBalance,
   } = useDerivedSwapInfo()
 
+  // console.debug('inputBalance:', inputBalance)
   // console.log('allowedSlippage', allowedSlippage.toFixed())
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = useMemo(
@@ -80,7 +81,9 @@ function Swap() {
 
   useEffect(() => {
     let isSubscribed = true
-
+    // console.log('Quote effect hook. inputCurrency:', inputCurrency)
+    // console.log('Quote effect hook. outputCurrency:', outputCurrency)
+    // console.log('Quote effect hook. parsedAmount:', parsedAmount)
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
         if (!quotes[aggId] || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString() || quotes[aggId]?.outputCurrencyId != outputCurrencyId) {
@@ -106,7 +109,7 @@ function Swap() {
     return () => {isSubscribed = false}
   }, [
     chainId,
-    inputCurrencyId,
+    inputCurrency?.symbol,
     outputCurrencyId,
     parsedAmount?.quotient.toString(),
     allowedSlippage
@@ -402,7 +405,7 @@ function Swap() {
 
         <div className="flex mt-10">
           {insufficientBalance && (
-            <div className="dark:text-red-200 text-xl font-bold">Insuffucient balance</div>
+            <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
           )}
           {needToApprove && (
             <button className="w-full dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
