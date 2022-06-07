@@ -285,12 +285,20 @@ function Swap() {
 
   const handleSwap = useCallback(async () => {
     // console.log('handle Swap')
-    if (library && txData && !needToApprove && inputCurrencyId && outputCurrencyId && parsedAmount) {
+    if (
+      library
+      && txData
+      && txData.to
+      && txData.data
+      && !needToApprove
+      && inputCurrencyId
+      && outputCurrencyId
+      && parsedAmount
+    ) {
       metarouterContract?.swap(
         inputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inputCurrencyId,
         outputCurrency?.isNative ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outputCurrencyId,
         BigInt(parsedAmount.quotient.toString()),
-        // @ts-ignore
         txData.to,
         txData.data,
         {
