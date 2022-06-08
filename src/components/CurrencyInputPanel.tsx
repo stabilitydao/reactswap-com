@@ -48,8 +48,6 @@ export default function CurrencyInputPanel({
     setModalOpen(false)
   }, [setModalOpen])
 
-
-
   return (
     <div {...rest} className="flex max-w-lg w-full">
 
@@ -68,11 +66,11 @@ export default function CurrencyInputPanel({
           <ChevronDownIcon width={24} height={24} className="ml-2 stroke-current" />
         </div>
       </div>
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col pr-3">
         <div className="w-1 h-10"> </div>
         {field === Field.INPUT ? (
           <input
-            className="w-48 h-12 text-2xl mt-0.5 text-right p-3"
+            className="w-40 lg:w-48 h-14 text-xl lg:text-2xl mt-0.5 text-right p-3 bg-amber-50 dark:bg-[#1f0045]"
             value={value}
             onChange={(event) => {
               enforcer(event.target.value.replace(/,/g, '.'))
@@ -89,7 +87,9 @@ export default function CurrencyInputPanel({
             spellCheck="false"
           />
         ) : (
-          <div className="mt-1 flex justify-end items-center border-2 dark:border-gray-500 w-48 h-12  text-2xl  text-right p-3">{value && parseFloat(value) > 0 && currency ? value : null}</div>
+          <div
+            className="flex justify-end items-center w-40 lg:w-48 h-14 text-xl lg:text-2xl text-right p-3 bg-amber-50 dark:bg-[#1f0045]"
+          >{value && parseFloat(value) > 0 && currency ? value : null}</div>
         )}
         {account ? (
           <div style={{ height: '17px' }} className="text-right pr-3">

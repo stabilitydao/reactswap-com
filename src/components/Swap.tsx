@@ -18,6 +18,7 @@ import { ArrowDown } from 'react-feather'
 import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
+import { useTheme } from 'next-themes'
 
 function Swap() {
   // console.log('Swap render')
@@ -355,10 +356,12 @@ function Swap() {
     }
   }
 
+  const { theme } = useTheme()
+
   return (
-    <div className="flex container max-w-4xl mt-5 mb-10">
-      <div className="flex flex-1 flex-col">
-        <div className="flex flex-col">
+    <div className="flex container max-w-4xl mt-5 mb-10 flex-wrap">
+      <div className="flex w-full md:w-1/2 flex-col items-center">
+        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
           <div className="flex text-sm pl-2">You sell</div>
           <CurrencyInputPanel
             field={Field.INPUT}
@@ -383,7 +386,7 @@ function Swap() {
             />
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
           <div className="flex text-sm pl-2">You buy</div>
           <CurrencyInputPanel
             field={Field.OUTPUT}
@@ -411,12 +414,12 @@ function Swap() {
           </div>
         }
 
-        <div className="flex mt-10">
+        <div className="flex mt-10 w-full max-w-sm">
           {insufficientBalance && (
             <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
           )}
           {needToApprove && (
-            <button className="w-full dark:bg-blue-600 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
+            <button className="w-full bg-teal-600 text-white dark:bg-blue-700 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
           )}
           {pendingApproval && (
             <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
@@ -425,7 +428,7 @@ function Swap() {
             </div>
           )}
           {canSwap && !pendingSwap && (
-            <button className="w-full dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>
+            <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>
           )}
           {pendingSwap && (
             <div className="w-full justify-center flex items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
@@ -435,20 +438,25 @@ function Swap() {
           )}
         </div>
       </div>
-      <div className="flex flex-1 flex-col ml-10">
-        <div className="flex text-sm pl-2">Quotes</div>
-        <div className="flex flex-col pt-5"></div>
-        {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId) => (
-          <div key={aggId} className="flex pl-8 py-6 items-center">
-            <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
-            <div className="text-lg pl-4">
-              {quotes[aggId]?.outputAmountFixed}
-              {quotes[aggId]?.error && (
-                <span className="text-sm text-left">{quotes[aggId]?.error}</span>
-              )}
-            </div>
+      <div className="flex w-full mt-10 md:mt-0 md:w-1/2 md:pl-5 flex-col items-center">
+
+        {Object.keys(quotes).length > 0 &&
+          <div className="flex md:ml-10 w-full max-w-sm flex-col dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
+            <div className="flex text-sm pl-2 md:mb-6">Quotes</div>
+            {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId) => (
+              <div key={aggId} className="flex pl-2 py-6 items-center w-full">
+                <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
+                <div className="text-lg pl-4">
+                  {quotes[aggId]?.outputAmountFixed}
+                  {quotes[aggId]?.error && (
+                    <span className="text-sm text-left">{quotes[aggId]?.error}</span>
+                  )}
+                </div>
+              </div>
+            ) )}
           </div>
-        ) )}
+        }
+
       </div>
     </div>
   )

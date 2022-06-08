@@ -115,7 +115,7 @@ export default function Modal({
                 minHeight={minHeight}
                 maxHeight={maxHeight}
                 mobile={isMobile}
-                className="bg-blue-100 dark:bg-indigo-800"
+                className="bg-orange-50 dark:bg-indigo-900 shadow-2xl"
               >
                 {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
                 {!initialFocusRef && isMobile ? <div tabIndex={1} /> : null}

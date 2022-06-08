@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Modal from '@/components/Modal'
 import { injected } from '@/src/connectors'
 import { shortenAddress } from '@/src/utils'
+import { BiWallet } from 'react-icons/bi'
 
 export default function Web3Status() {
   const { activate, deactivate, account } = useWeb3React()
@@ -34,9 +35,11 @@ export default function Web3Status() {
   return (
     <>
       {account ? (
-          <button className="dark: bg-green-600 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>{shortenAddress(account)}</button>
+          <button className="bg-orange-300 dark:bg-teal-800 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>{shortenAddress(account)}</button>
       ) : (
-        <button className="dark: bg-blue-700 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>Connect wallet</button>
+        <button className="flex items-center dark:bg-indigo-700 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>
+          <BiWallet className="text-xl md:hidden" /> <span className="hidden md:flex">Connect wallet</span>
+        </button>
       )}
       <Modal isOpen={modalOpened} onDismiss={toggleWalletModal} maxHeight={80} minHeight={20}>
         {account ? (
