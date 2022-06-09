@@ -23,6 +23,30 @@ export function shortenAddress(address: string, chars = 4): string {
   return `${parsed.substring(0, chars + 2)}...${parsed.substring(42 - chars)}`
 }
 
+export function isNativeAddress(address: string): boolean {
+  return toChecksumAddress(address) === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+}
+
+export function getNativeLogoURI(chainId: ChainId): string {
+  return `/img/${chainId}-native.svg`
+}
+
+export function getCurrencyLogoURI(currency?: Currency): string {
+  if (currency) {
+    if ( currency instanceof WrappedTokenInfo && currency.logoURI) {
+      return currency.logoURI
+    }
+    if (currency.isNative) {
+      return getNativeLogoURI(currency.chainId);
+    }
+    if (currency.isToken && currency.address === wrappedNative[currency.chainId].address) {
+      return getNativeLogoURI(currency.chainId);
+    }
+  }
+
+  return '/img/no-logo.png'
+}
+
 // account is not optional
 function getSigner(library: JsonRpcProvider, account: string): JsonRpcSigner {
   return library.getSigner(account).connectUnchecked()
@@ -53,6 +77,10 @@ export function isTokenOnList(chainTokenMap: ChainTokenMap, token?: Token): bool
 import { parseUnits } from '@ethersproject/units'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
+import { toChecksumAddress } from '@walletconnect/utils'
+import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
+import { wrappedNative } from '@/src/constants/currencies'
+import { ChainId } from '@/src/enums/ChainId'
 
 /**
  * Parses a CurrencyAmount from the passed string.

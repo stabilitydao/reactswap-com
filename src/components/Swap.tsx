@@ -18,7 +18,8 @@ import { ArrowDown } from 'react-feather'
 import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
-import { useTheme } from 'next-themes'
+import Routing from '@/components/Routing'
+import { OneInchLiquiditySource } from '@/src/types/OneInchLiquiditySource'
 
 function Swap() {
   // console.log('Swap render')
@@ -335,7 +336,6 @@ function Swap() {
   const [slippageError, setSlippageError] = useState<'invalid input' | false>(false)
 
   function parseSlippageInput(value: string) {
-
     // populate what the user typed and clear the error
     setSlippageInput(value)
     setSlippageError(false)
@@ -356,7 +356,27 @@ function Swap() {
     }
   }
 
-  const { theme } = useTheme()
+  const [oneInchSources, setOneInchSources] = useState<{[id:string]:OneInchLiquiditySource}>({})
+
+  useEffect(() => {
+    // console.log('get liquidity sources')
+    const run = async () => {
+      const ls = await aggregators[chainId][AggregatorId.OneInch].getSources()
+      const sources: {[id:string]:OneInchLiquiditySource} = {}
+
+      ls.forEach((source: OneInchLiquiditySource) => {
+        if (source.id) {
+          sources[source.id] = source
+        }
+      })
+
+      // console.debug(sources)
+      setOneInchSources(sources)
+    }
+
+    run()
+
+  }, [])
 
   return (
     <div className="flex container max-w-4xl mt-5 mb-10 flex-wrap">
@@ -441,10 +461,10 @@ function Swap() {
       <div className="flex w-full mt-10 md:mt-0 md:w-1/2 md:pl-5 flex-col items-center">
 
         {Object.keys(quotes).length > 0 &&
-          <div className="flex md:ml-10 w-full max-w-sm flex-col dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
-            <div className="flex text-sm pl-2 md:mb-6">Quotes</div>
+          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
+            <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
             {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId) => (
-              <div key={aggId} className="flex pl-2 py-6 items-center w-full">
+              <div key={aggId} className="flex pl-2 py-3 items-center w-full">
                 <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
                 <div className="text-lg pl-4">
                   {quotes[aggId]?.outputAmountFixed}
@@ -454,6 +474,12 @@ function Swap() {
                 </div>
               </div>
             ) )}
+            <div className="mt-4 flex text-sm pl-2 md:mb-6">Best routing</div>
+            <div>
+              {bestQuote &&
+                <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
+              }
+            </div>
           </div>
         }
 

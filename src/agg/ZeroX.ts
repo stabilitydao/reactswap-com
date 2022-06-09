@@ -38,7 +38,7 @@ export class ZeroX implements SwapAggregator {
         url,
         params,
       })
-      // console.log(data)
+      // console.log(`${this.id} quote reply raw data:`, data)
 
       return {
         chainId: this.chainId,
@@ -55,7 +55,7 @@ export class ZeroX implements SwapAggregator {
         estimatedGas: data.estimatedGas,
         gas: data.gas,
         gasPrice: data.gasPrice,
-        sources: data.sources,
+        sources: data.orders,
         allowanceTarget: data.allowanceTarget,
       }
     } catch (error) {

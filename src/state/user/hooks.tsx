@@ -213,11 +213,10 @@ export function useRemoveUserAddedToken(): (chainId: number, address: string) =>
 
 export function useUserAddedTokens(): Token[] {
   const chainId = useChainId()
-  // const { account, chainId } = useActiveWeb3React()
   const serializedTokensMap = useAppSelector(({ user: { tokens } }) => tokens)
 
   return useMemo(() => {
-    if (!chainId/* || !account*/) return []
+    if (!chainId) return []
     const tokenMap: Token[] = serializedTokensMap?.[chainId]
       ? Object.values(serializedTokensMap[chainId]).map(deserializeToken)
       : []

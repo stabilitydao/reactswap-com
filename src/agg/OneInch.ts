@@ -65,7 +65,7 @@ export class OneInch implements SwapAggregator {
         url,
         params,
       })
-      console.log('1Inch quote reply raw data:', data)
+      // console.log(`${this.id} quote reply raw data:`, data)
 
       return {
         chainId: this.chainId,

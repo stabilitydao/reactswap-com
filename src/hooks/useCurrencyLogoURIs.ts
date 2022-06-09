@@ -1,13 +1,8 @@
 import { Currency } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
-import { ChainId } from '@/src/enums/ChainId'
 import { wrappedNative } from '@/src/constants/currencies'
-
-
-function getNativeLogoURI(chainId: ChainId): string {
-  return `/img/${chainId}-native.svg`
-}
+import { getNativeLogoURI } from '@/src/utils'
 
 export default function useCurrencyLogoURI(currency?: Currency): string {
   return useMemo(() => {
