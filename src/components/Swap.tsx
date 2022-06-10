@@ -313,11 +313,9 @@ function Swap() {
         }
       ).then((response) => {
         setPendingSwap(true)
-        onUserInput('')
 
         response.wait(1).then(() => {
           setPendingSwap(false)
-          onUserInput('')
         }).catch(() => {
           setPendingSwap(false)
           console.log('swap failed')
