@@ -30,6 +30,7 @@ function Swap() {
   const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
   const allowanceTarget:string = metarouter[chainId]
   const [pendingApproval, setPendingApproval] = useState<boolean>(false)
+  const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
   const [approved, setApproved] = useState<boolean>(false)
   const [txData, setTxData] = useState<TransactionRequest|undefined>()
   const [pendingSwap, setPendingSwap] = useState<boolean>(false)
@@ -149,17 +150,19 @@ function Swap() {
   // console.log('Approval state:', approval)
 
   useEffect(() => {
-    if (approval === ApprovalState.NOT_APPROVED) {
+    if (approval === ApprovalState.NOT_APPROVED && !pendingApproval && !approvalSubmitted) {
       setApproved(false)
     }
     if (approval === ApprovalState.PENDING) {
       setPendingApproval(true)
+      setApprovalSubmitted(true)
     }
     if (approval === ApprovalState.APPROVED) {
       setApproved(true)
       setPendingApproval(false)
+      setApprovalSubmitted(false)
     }
-  }, [approval])
+  }, [approval, approvalSubmitted])
 
   const needToApprove =
     inputCurrency
@@ -247,6 +250,7 @@ function Swap() {
       onCurrencySelection(Field.INPUT, inputCurrency)
       setQuotes({})
       setApproved(false)
+      setApprovalSubmitted(false)
     },
     [onCurrencySelection]
   )
@@ -269,9 +273,10 @@ function Swap() {
     const res: { response: TransactionResponse; tokenAddress: string; spenderAddress: string } | undefined
       = await approveCallback()
 
-    setPendingApproval(true)
-
     if (res) {
+      setApprovalSubmitted(true)
+      setPendingApproval(true)
+
       res.response.wait(1).then(() => {
         // console.log('approval tx confirmed')
         setPendingApproval(false)
@@ -399,6 +404,7 @@ function Swap() {
               className="cursor-pointer"
               size="24"
               onClick={() => {
+                setApprovalSubmitted(false)
                 setQuotes({})
                 onSwitchTokens()
               }}
