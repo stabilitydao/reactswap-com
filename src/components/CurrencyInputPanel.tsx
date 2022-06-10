@@ -98,7 +98,7 @@ export default function CurrencyInputPanel({
               style={{ display: 'inline', cursor: field === Field.INPUT ? 'pointer' : 'default' }}
             >
               {currency && selectedCurrencyBalance ? (
-                <span>Balance: {formatCurrencyAmount(selectedCurrencyBalance, 4)}</span>
+                <span className="whitespace-nowrap">Balance: {formatCurrencyAmount(selectedCurrencyBalance, 4)}</span>
               ) : null}
             </div>
           </div>
