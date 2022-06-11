@@ -16,4 +16,13 @@ module.exports = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/swap',
+        permanent: false,
+      },
+    ]
+  },
 }

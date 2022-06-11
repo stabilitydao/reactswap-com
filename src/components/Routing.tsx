@@ -1,6 +1,6 @@
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { AggregatorId } from '@/src/enums/AggregatorId'
-import { OneInchLiquiditySource } from '@/src/types/OneInchLiquiditySource'
+import { OneInchLiquiditySource, OneInchLuqidityPoolRoute } from '@/src/types/AggApiTypes'
 import { useAllTokens } from '@/src/hooks/useTokenList'
 import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
 import { Token } from '@uniswap/sdk-core'
@@ -28,14 +28,14 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
   return (
     <>
       <div className={aggId === AggregatorId.OneInch ? "flex flex-col" : "flex flex-row flex-wrap justify-center"}>
-        {Object.keys(bestQuote.sources).map(( i) => {
+        {Object.keys(bestQuote.sources).map(( i, index) => {
           if (aggId === AggregatorId.OneInch) {
             const routeBlock = bestQuote.sources[i]
             // console.log('Route block', routeBlock)
 
             return (
-              <div key={i} className="flex justify-center flex-wrap">
-                {routeBlock.map((tokenToRoute:any, i:number) => {
+              <div key={'1i' + index} className="flex justify-center flex-wrap">
+                {routeBlock.map((tokenToRoute:OneInchLuqidityPoolRoute[], index:number) => {
                   const fromTokenAddr = toChecksumAddress(tokenToRoute[0].fromTokenAddress)
                   const toTokenAddr = toChecksumAddress(tokenToRoute[0].toTokenAddress)
                   const fromToken = allTokens[fromTokenAddr] && allTokens[fromTokenAddr] instanceof WrappedTokenInfo ? allTokens[fromTokenAddr] as WrappedTokenInfo : isNativeAddress(fromTokenAddr) ? native[chainId] : undefined
@@ -44,7 +44,7 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                   const toLogoURI = getCurrencyLogoURI(token)
 
                   return (
-                    <div key={'' + i + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-[#13123b] m-3 pt-3 pb-2 px-2 rounded-2xl">
+                    <div key={'' + index + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-[#13123b] m-3 pt-3 pb-2 px-2 rounded-2xl">
                       <div className="text-sm flex justify-center mb-3 items-center">
                         {fromLogoURI ?
                           <img src={fromLogoURI} className="w-7 h-7 rounded-full m-1" title={fromToken?.symbol} alt={fromToken?.symbol}  />
@@ -57,16 +57,11 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                         }
                       </div>
                       <div className="inline-flex flex-row flex-wrap justify-center">
-                        {tokenToRoute.map((liquidityPoolRoute:{
-                          name:string,
-                          fromTokenAddress:string,
-                          toTokenAddress: string,
-                          part: string,
-                        }) => {
+                        {tokenToRoute.map((liquidityPoolRoute:OneInchLuqidityPoolRoute, index) => {
                           // console.log('liquidityPoolRoute', liquidityPoolRoute)
 
                           return (
-                            <div key={'' + fromTokenAddr + toTokenAddr + liquidityPoolRoute.name} className="flex text-sm">
+                            <div key={'' + index + fromTokenAddr + toTokenAddr + liquidityPoolRoute.name} className="flex text-sm">
                               {inchSources[liquidityPoolRoute.name] && (
                                 <img className="h-9 w-9 mx-1.5 my-1.5" src={inchSources[liquidityPoolRoute.name].img_color} alt={liquidityPoolRoute.name} title={inchSources[liquidityPoolRoute.name].title} />
                               )}

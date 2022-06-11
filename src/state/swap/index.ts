@@ -1,8 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { queryParametersToSwapState } from './hooks'
-import { parsedQueryString } from '@/src/hooks/useParsedQueryString'
+import { createSlice } from '@reduxjs/toolkit'
 import { Field } from '@/src/state/swap/actions'
-import { AppState } from '@/src/state/store'
 
 export interface SwapState {
   inputValue: string | any
@@ -10,7 +7,11 @@ export interface SwapState {
   outputCurrencyId: string | undefined
 }
 
-const initialState: SwapState = queryParametersToSwapState(parsedQueryString())
+const initialState: SwapState = {
+  inputCurrencyId: '',
+  outputCurrencyId: '',
+  inputValue: ''
+}
 
 export const swapSlice = createSlice({
   name: 'swap',

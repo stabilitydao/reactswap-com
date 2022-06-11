@@ -8,7 +8,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <main className="">
         <Head>
           <title>ReactSwap</title>
-          <meta name="description" content="ReactSwap decentralized exchange" />
+          <meta name="description" content="ReactSwap decentralized swap at the best price" />
           <link rel="shortcut icon" type="image/png" href="/img/react.png" />
         </Head>
         <div className="relative from-green-50 to-orange-200 bg-gradient-to-tr dark:from-violet-900 dark:via-black dark:to-red-900 font-Roboto dark:text-white dark:bg-teal-900 h-full pb-20">

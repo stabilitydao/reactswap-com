@@ -1,7 +1,14 @@
-import { useDerivedSwapInfo, useSwapActionHandlers, useSwapState } from '@/src/state/swap/hooks'
-import { useChainId } from '@/src/state/network/hooks'
-import { Currency, CurrencyAmount, Percent} from '@uniswap/sdk-core'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
+import {
+  useDefaultsFromURLSearch,
+  useDerivedSwapInfo,
+  useSwapActionHandlers,
+  useSwapState,
+} from '@/src/state/swap/hooks'
+import { useChainId } from '@/src/state/network/hooks'
+import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core'
 import { Field } from '@/src/state/swap/actions'
 import CurrencyInputPanel from '@/components/CurrencyInputPanel'
 import { AggregatorId } from '@/src/enums/AggregatorId'
@@ -10,7 +17,6 @@ import { SwapQuote } from '@/src/types/SwapQuote'
 import { maxAmountSpend } from '@/src/utils/maxAmountSpend'
 import { ApprovalState, useApproval } from '@/src/hooks/useApproval'
 import JSBI from 'jsbi'
-import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { TransactionResponse } from '@ethersproject/providers'
 import Loader from '@/components/Loader'
@@ -19,13 +25,20 @@ import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
 import Routing from '@/components/Routing'
-import { OneInchLiquiditySource } from '@/src/types/OneInchLiquiditySource'
+import { OneInchLiquiditySource } from '@/src/types/AggApiTypes'
+// import useCurrency from '@/src/hooks/useCurrency'
+// import { TOKEN_SHORTHANDS } from '@/src/constants/currencies'
+// import { useAllTokens } from '@/src/hooks/useTokenList'
+// import { ChainId } from '@/src/enums/ChainId'
+import { currencyId } from '@/src/utils/currencyId'
 
 function Swap() {
   // console.log('Swap render')
   const chainId = useChainId()
   const { account, library } = useActiveWeb3React()
-  // const loadedUrlParams = useDefaultsFromURLSearch(chainId)
+  /*const loadedUrlParams =*/ useDefaultsFromURLSearch(chainId)
+
+  const router = useRouter()
 
   const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
   const allowanceTarget:string = metarouter[chainId]
@@ -44,8 +57,8 @@ function Swap() {
     [loadedInputCurrency, loadedOutputCurrency],
   )*/
 
-  // const defaultTokens = useAllTokens()
-  /*const importTokensNotInDefault = useMemo(
+  /*const defaultTokens = useAllTokens()
+  const importTokensNotInDefault = useMemo(
     () =>
       urlLoadedTokens &&
       urlLoadedTokens
@@ -64,7 +77,7 @@ function Swap() {
     [chainId, defaultTokens, urlLoadedTokens]
   )*/
 
-  const { inputValue, inputCurrencyId, outputCurrencyId } = useSwapState()
+  const { inputValue } = useSwapState()
 
   const {
     allowedSlippage,
@@ -74,6 +87,7 @@ function Swap() {
     inputBalance,
   } = useDerivedSwapInfo()
 
+  // console.debug('inputCurrency:', inputCurrency?.symbol)
   // console.debug('inputBalance:', inputBalance)
   // console.log('allowedSlippage', allowedSlippage.toFixed())
 
@@ -89,7 +103,7 @@ function Swap() {
     // console.log('Quote effect hook. parsedAmount:', parsedAmount)
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
-        if (!quotes[aggId] || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString() || quotes[aggId]?.outputCurrencyId != outputCurrencyId) {
+        if (!quotes[aggId] || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString() || quotes[aggId]?.outputCurrencyId != currencyId(outputCurrency)) {
           console.log(`Quoting ${aggId}..`)
           aggregators[chainId][aggId].getQuote(
             inputCurrency,
@@ -113,7 +127,7 @@ function Swap() {
   }, [
     chainId,
     inputCurrency?.symbol,
-    outputCurrencyId,
+    outputCurrency?.symbol,
     parsedAmount?.quotient.toString(),
     allowedSlippage
   ])
@@ -240,27 +254,46 @@ function Swap() {
   const handleTypeInput = useCallback(
     (value: string) => {
       onUserInput(value)
+
+      router.replace(`?chainId=${chainId}&inputCurrency=${inputCurrency ? currencyId(inputCurrency) : ''}&outputCurrency=${outputCurrency ? currencyId(outputCurrency) : ''}&exactAmount=${value}`, undefined, { shallow: true })
       setQuotes({})
     },
-    [onUserInput]
+    [onUserInput, inputCurrency, outputCurrency]
   )
 
   const handleInputSelect = useCallback(
     (inputCurrency:Currency) => {
       onCurrencySelection(Field.INPUT, inputCurrency)
+      const inputParamValue = inputCurrency.isToken ? inputCurrency.address : 'ETH'
+      const outputParamValue = outputCurrency ? outputCurrency.isToken ? outputCurrency.address : 'ETH' : undefined
+
+      if (outputParamValue) {
+        router.replace(`?chainId=${chainId}&inputCurrency=${inputParamValue}&outputCurrency=${outputParamValue}&exactAmount=${inputValue}`, undefined, { shallow: true })
+      } else {
+        router.replace(`?chainId=${chainId}&inputCurrency=${inputParamValue}&exactAmount=${inputValue}`, undefined, { shallow: true })
+      }
+
       setQuotes({})
       setApproved(false)
       setApprovalSubmitted(false)
     },
-    [onCurrencySelection]
+    [onCurrencySelection, outputCurrency, chainId, inputValue]
   )
 
   const handleOutputSelect = useCallback(
     (outputCurrency:Currency) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
+      const inputParamValue = inputCurrency ? inputCurrency.isToken ? inputCurrency.address : 'ETH' : undefined
+      const outputParamValue = outputCurrency.isToken ? outputCurrency.address : 'ETH'
+
+      if (inputParamValue) {
+        router.replace(`?chainId=${chainId}&inputCurrency=${inputParamValue}&outputCurrency=${outputParamValue}&exactAmount=${inputValue}`, undefined, { shallow: true })
+      } else {
+        router.replace(`?chainId=${chainId}&outputCurrency=${outputParamValue}&exactAmount=${inputValue}`, undefined, { shallow: true })
+      }
       setQuotes({})
     },
-    [onCurrencySelection]
+    [onCurrencySelection, inputCurrency, chainId, inputValue]
   )
 
   const handleMaxInput = useCallback(() => {

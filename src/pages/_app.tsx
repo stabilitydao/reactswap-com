@@ -36,7 +36,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         <MulticallUpdater />
         <GlobalHooks />
         <Layout>
-          <Component {...pageProps} />
+          <div
+            className="flex flex-col justify-start items-center text-center"
+            style={{ minHeight: 'calc(100vh - 144px)' }}
+          >
+            <Component {...pageProps} />
+          </div>
         </Layout>
       </Web3ReactProvider>
     </Provider>

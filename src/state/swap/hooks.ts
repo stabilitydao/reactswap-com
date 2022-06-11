@@ -52,6 +52,7 @@ export function useDerivedSwapInfo(): {
   // allowed slippage is either default or custom user defined slippage
   const allowedSlippage = useUserSlippageToleranceWithDefault(new Percent(50, 10_000)) // .50%
 
+  // console.log('useDerivedSwapInfo() inputCurrency:', inputCurrency)
   return useMemo(
     () => ({
       inputCurrency,
@@ -61,7 +62,16 @@ export function useDerivedSwapInfo(): {
       parsedAmount,
       allowedSlippage,
     }),
-    [allowedSlippage, inputCurrency, outputCurrency, inputValue, relevantTokenBalances[0]?.quotient.toString(), account]
+    [
+      allowedSlippage,
+      inputCurrencyId,
+      outputCurrencyId,
+      inputCurrency,
+      outputCurrency,
+      inputValue,
+      relevantTokenBalances[0]?.quotient.toString(),
+      account
+    ]
   )
 }
 
@@ -87,8 +97,9 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
   let outputCurrency = parseCurrencyFromURLParameter(parsedQs.outputCurrency)
   let inputValue = parseTokenAmountURLParameter(parsedQs.exactAmount)
 
-  if (inputCurrency === '' && outputCurrency === '' && inputValue === '') {
+  if (typeof window !== "undefined" && inputCurrency === '' && outputCurrency === '' && inputValue === '') {
     // Defaults to having the native currency selected
+    // console.debug('Defaults to having the native currency selected')
     inputCurrency = 'WBTC'
     outputCurrency = 'DAI'
     inputValue = '1'
@@ -106,18 +117,18 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
 
 // updates the swap state to use the defaults for a given network
 export function useDefaultsFromURLSearch(chainId: number): SwapState {
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useAppDispatch()
   const parsedQs = useParsedQueryString()
-
   const parsedSwapState = useMemo(() => {
     return queryParametersToSwapState(parsedQs)
   }, [parsedQs])
 
+  // console.log(parsedQs)
   useEffect(() => {
     if (!chainId) return
     const inputCurrency = parsedSwapState.inputCurrencyId ?? undefined
     const outputCurrency = parsedSwapState.outputCurrencyId ?? undefined
-
+    // console.log('useDefaultsFromURLSearch inputCurrency', inputCurrency)
     dispatch(
       replaceSwapState({
         inputValue: parsedSwapState.inputValue,
@@ -127,7 +138,7 @@ export function useDefaultsFromURLSearch(chainId: number): SwapState {
     )
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, chainId])
+  }, [dispatch, chainId, Object.keys(parsedQs).length]) // !!
 
   return parsedSwapState
 }

@@ -74,7 +74,7 @@ function useCallsData(calls: (Call | undefined)[], { blocksPerFetch }: ListenerO
     if (!chainId || callKeys.length === 0) return undefined
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const calls = callKeys.map((key) => parseCallKey(key))
-    console.log('useCallsData() useEffect() dispatch addMulticallListeners(). Calls', calls)
+    // console.log('useCallsData() useEffect() dispatch addMulticallListeners(). Calls', calls)
     dispatch(
       addMulticallListeners({
         chainId,

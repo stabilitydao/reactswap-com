@@ -46,10 +46,13 @@ function Navbar() {
 
   return (
     <nav className="h-16 flex flex-row items-center justify-between px-6">
-      <div className="flex">
+      <a
+        href="/"
+        className="flex"
+      >
         <img src="/img/react.png" className="h-10 w-10" alt="" />{' '}
         <h1 className=" ml-3 self-center font-bold text-2xl hidden md:flex">ReactSwap</h1>
-      </div>
+      </a>
       <div className="flex items-center">
         <div className="mr-4">
           <Web3Status />
