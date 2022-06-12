@@ -98,7 +98,7 @@ function Swap() {
 
   useEffect(() => {
     let isSubscribed = true
-    console.log('Quote effect hook. deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString(), allowedSlippage)
+    console.log('Quote effect hook. deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString(), allowedSlippage.quotient.toString())
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
         if (
@@ -131,7 +131,7 @@ function Swap() {
     inputCurrency?.symbol,
     outputCurrency?.symbol,
     parsedAmount?.quotient.toString(),
-    allowedSlippage
+    allowedSlippage.quotient.toString()
   ])
 
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
