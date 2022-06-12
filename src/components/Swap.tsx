@@ -98,12 +98,14 @@ function Swap() {
 
   useEffect(() => {
     let isSubscribed = true
-    // console.log('Quote effect hook. inputCurrency:', inputCurrency)
-    // console.log('Quote effect hook. outputCurrency:', outputCurrency)
-    // console.log('Quote effect hook. parsedAmount:', parsedAmount)
+    console.log('Quote effect hook. deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString(), allowedSlippage)
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
-        if (!quotes[aggId] || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString() || quotes[aggId]?.outputCurrencyId != currencyId(outputCurrency)) {
+        if (
+          !quotes[aggId]
+          || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString()
+          || quotes[aggId]?.outputCurrencyId != currencyId(outputCurrency)
+        ) {
           console.log(`Quoting ${aggId}..`)
           aggregators[chainId][aggId].getQuote(
             inputCurrency,
