@@ -18,11 +18,11 @@ Decentralized swap at the best price protocol. The best route and rate is calcul
 
 #### Aggregator integrations
 
-* [live] **1inch** [api docs](https://docs.1inch.io/docs/aggregation-protocol/introduction)
-* [live] **0x** [api docs](https://docs.0x.org/0x-api-swap/introduction)
-* [proposed] **OpenOcean** [api docs](https://docs.openocean.finance/api/openocean-dex-api-3.0)
+* **1inch** [api docs](https://docs.1inch.io/docs/aggregation-protocol/introduction)
+* **0x** [api docs](https://docs.0x.org/0x-api-swap/introduction)
+* **OpenOcean** [api docs](https://docs.openocean.finance/api/openocean-dex-api-3.0)
 
-Status: [**v0 live**](https://reactswap.com)
+Status: [**live**](https://reactswap.com)
 
 Dev budget: 50k PROFIT [executed proposal](https://www.tally.xyz/governance/eip155:137:0x6214Ba4Ce85C0A6F6025b0d63be7d65214463226/proposal/66682422927270058524602136602710037138274409785058239023318639830806613899674)
 
