@@ -1,11 +1,11 @@
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { AggregatorId } from '@/src/enums/AggregatorId'
-import { OneInchLiquiditySource, OneInchLuqidityPoolRoute } from '@/src/types/AggApiTypes'
+import { OneInchLiquiditySource, OneInchLuqidityPoolRoute, OpenOceanSubRoute } from '@/src/types/AggApiTypes'
 import { useAllTokens } from '@/src/hooks/useTokenList'
 import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
 import { Token } from '@uniswap/sdk-core'
 import { toChecksumAddress } from '@walletconnect/utils'
-import { sourceMappingZeroXOneInch } from '@/src/constants/aggregators'
+import { sourceMappingOpenOceanOneInch, sourceMappingZeroXOneInch } from '@/src/constants/aggregators'
 import { ChainId } from '@/src/enums/ChainId'
 import {BiFastForward} from 'react-icons/bi'
 import { getCurrencyLogoURI, isNativeAddress, shortenAddress } from '@/src/utils'
@@ -28,6 +28,49 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
   return (
     <>
       <div className={aggId === AggregatorId.OneInch ? "flex flex-col" : "flex flex-row flex-wrap justify-center"}>
+        {aggId === AggregatorId.OpenOcean &&
+          bestQuote.sources.routes[0].subRoutes.map((r:OpenOceanSubRoute, index: number) => {
+            // console.log(r)
+            const fromTokenAddr = toChecksumAddress(r.from)
+            const toTokenAddr = toChecksumAddress(r.to)
+            const fromToken = allTokens[fromTokenAddr] && allTokens[fromTokenAddr] instanceof WrappedTokenInfo ? allTokens[fromTokenAddr] as WrappedTokenInfo : isNativeAddress(fromTokenAddr) ? native[chainId] : undefined
+            const toToken = allTokens[toTokenAddr] && allTokens[toTokenAddr] instanceof WrappedTokenInfo ? allTokens[toTokenAddr] as WrappedTokenInfo : isNativeAddress(toTokenAddr) ? native[chainId] : undefined
+            const fromLogoURI = getCurrencyLogoURI(fromToken)
+            const toLogoURI = getCurrencyLogoURI(toToken)
+
+            return (
+              <div
+                key={'oo' + index + fromTokenAddr + toTokenAddr}
+                className="flex justify-center flex-col m-3 p-2.5"
+              >
+                <div className="flex justify-center items-center">
+                  {fromToken &&
+                    <img src={fromLogoURI} className="w-7 h-7 rounded-full m-1" title={fromToken.symbol} alt={fromToken.symbol}  />
+                  }
+                  <BiFastForward stroke={'#ffff00'} />
+                  {toToken &&
+                    <img src={toLogoURI} className="w-7 h-7 rounded-full m-1" title={toToken.symbol} alt={toToken.symbol}  />
+                  }
+                </div>
+                <div className="flex justify-center">
+                  {Object.keys(r.dexes).map((i: string, index: number) => {
+                    const dex = r.dexes[index]
+                    // console.log(dex)
+                    const inchSource:OneInchLiquiditySource|undefined = sourceMappingOpenOceanOneInch[chainId][dex.dex] ? inchSources[sourceMappingOpenOceanOneInch[chainId][dex.dex]] : undefined
+                    // console.log(inchSource)
+
+                    return inchSource ? (
+                      <div key={'oo-source' + i + fromTokenAddr + toTokenAddr}>
+                        <img className="h-9 w-9 m-1.5" src={inchSource.img_color} alt={inchSource.title} title={inchSource.title} />
+                      </div>
+                    ) : null
+                  })}
+                </div>
+              </div>
+            )
+          })
+        }
+
         {Object.keys(bestQuote.sources).map(( i, index) => {
           if (aggId === AggregatorId.OneInch) {
             const routeBlock = bestQuote.sources[i]
@@ -44,7 +87,7 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                   const toLogoURI = getCurrencyLogoURI(token)
 
                   return (
-                    <div key={'' + index + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-[#13123b] m-3 pt-3 pb-2 px-2 rounded-2xl">
+                    <div key={'' + index + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-transparent m-3 pt-3 pb-2 px-2 rounded-2xl">
                       <div className="text-sm flex justify-center mb-3 items-center">
                         {fromLogoURI ?
                           <img src={fromLogoURI} className="w-7 h-7 rounded-full m-1" title={fromToken?.symbol} alt={fromToken?.symbol}  />
@@ -87,7 +130,7 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
             return (
               <div
                 key={'0xOrder' + JSON.stringify(order)}
-                className="inline-flex flex-col justify-center dark:bg-indigo-900 m-3 p-2.5 dark:bg-[#13123b] rounded-2xl"
+                className="inline-flex flex-col justify-center dark:bg-transparent m-3 p-2.5 rounded-2xl"
               >
                 <div className="flex justify-center items-center">
                   {fromToken &&
@@ -106,7 +149,6 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                 </div>
               </div>
             )
-
           }
         })}
       </div>

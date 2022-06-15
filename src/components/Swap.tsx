@@ -20,7 +20,7 @@ import JSBI from 'jsbi'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { TransactionResponse } from '@ethersproject/providers'
 import Loader from '@/components/Loader'
-import { ArrowDown } from 'react-feather'
+import {HiSwitchVertical} from 'react-icons/hi'
 import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
@@ -113,11 +113,15 @@ function Swap() {
             parsedAmount,
             parseFloat(allowedSlippage.toFixed(2)),
             account ?? undefined
-          ).then(quote => {
+          ).then((quote:SwapQuote) => {
             console.log(`${aggId} reply quote data:`, quote)
             if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
               if (isSubscribed) {
-                setQuotes(q => ({...q, [aggId]: quote}))
+                // setQuotes(q => ({...q, [aggId]: quote}))
+                // sort
+                setQuotes(q => Object.entries({...q, [aggId]: quote})
+                  .sort(([,a],[,b]) => b?.outputAmountFixed && a?.outputAmountFixed ? parseFloat(b.outputAmountFixed) - parseFloat(a.outputAmountFixed) : 0)
+                  .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}))
               }
             }
           })
@@ -217,7 +221,7 @@ function Swap() {
           bestQuote,
           parseFloat(allowedSlippage.toFixed(2))
         )
-        // console.log('Buildtx setTxData')
+        console.log('Buildtx setTxData:', txData)
         if (isSubscribed) {
           setTxData(txData)
         }
@@ -417,9 +421,9 @@ function Swap() {
   }, [])
 
   return (
-    <div className="flex container max-w-4xl mt-5 mb-10 flex-wrap">
+    <div className="flex container max-w-4xl mt-5 md:mt-0 mb-10 flex-wrap">
       <div className="flex w-full md:w-1/2 flex-col items-center">
-        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
+        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
           <div className="flex text-sm pl-2">You sell</div>
           <CurrencyInputPanel
             field={Field.INPUT}
@@ -433,19 +437,18 @@ function Swap() {
         </div>
         <div className="h-20 flex justify-center items-center">
           <div title="Switch tokens">
-            <ArrowDown
+            <HiSwitchVertical
               className="cursor-pointer"
-              size="24"
+              size="32"
               onClick={() => {
                 setApprovalSubmitted(false)
                 setQuotes({})
                 onSwitchTokens()
               }}
-              color={'#00bdec'}
             />
           </div>
         </div>
-        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
+        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
           <div className="flex text-sm pl-2">You buy</div>
           <CurrencyInputPanel
             field={Field.OUTPUT}
@@ -500,19 +503,25 @@ function Swap() {
       <div className="flex w-full mt-10 md:mt-0 md:w-1/2 md:pl-5 flex-col items-center">
 
         {Object.keys(quotes).length > 0 &&
-          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col dark:bg-black pb-5 rounded-2xl border-2 dark:border-indigo-900 p-3 shadow-2xl dark:shadow-indigo-900 dark:shadow-lg">
+          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
             <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
-            {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId) => (
-              <div key={aggId} className="flex pl-2 py-3 items-center w-full">
-                <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
-                <div className="text-lg pl-4">
-                  {quotes[aggId]?.outputAmountFixed}
-                  {quotes[aggId]?.error && (
-                    <span className="text-sm text-left">{quotes[aggId]?.error}</span>
-                  )}
+            {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
+              const isBest = Object.keys(quotes).length > 1 && index == 0
+
+              return (
+                <div key={aggId} className="flex pl-2 py-3 items-center w-full">
+                  <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
+                  <div className="text-lg pl-4">
+                    {isBest ? (
+                      <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
+                    ) : quotes[aggId]?.outputAmountFixed}
+                    {quotes[aggId]?.error && (
+                      <span className="text-sm text-left">{quotes[aggId]?.error}</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) )}
+              )
+            } )}
             <div className="mt-4 flex text-sm pl-2 md:mb-6">Best routing</div>
             <div>
               {bestQuote &&

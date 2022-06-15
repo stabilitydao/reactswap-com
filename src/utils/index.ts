@@ -25,6 +25,7 @@ export function shortenAddress(address: string, chars = 4): string {
 
 export function isNativeAddress(address: string): boolean {
   return toChecksumAddress(address) === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+    || toChecksumAddress(address) === '0x0000000000000000000000000000000000001010'
 }
 
 export function getNativeLogoURI(chainId: ChainId): string {

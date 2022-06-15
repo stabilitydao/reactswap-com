@@ -11,3 +11,12 @@ export type OneInchLuqidityPoolRoute = {
   toTokenAddress: string,
   part: string,
 }
+
+export type OpenOceanSubRoute = {
+  from: string,
+  to: string,
+  dexes: {
+    dex: string,
+  }[],
+  parts: number,
+}

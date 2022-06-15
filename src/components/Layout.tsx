@@ -11,10 +11,10 @@ function Layout({ children }: { children: React.ReactNode }) {
           <meta name="description" content="ReactSwap decentralized swap at the best price" />
           <link rel="shortcut icon" type="image/png" href="/img/react.png" />
         </Head>
-        <div className="relative from-green-50 to-orange-200 bg-gradient-to-tr dark:from-violet-900 dark:via-black dark:to-red-900 font-Roboto dark:text-white dark:bg-teal-900 h-full pb-20">
+        <div className="relative from-green-50 to-orange-200 bg-gradient-to-tr dark:from-[#454344] dark:to-[#543a3b] font-Roboto dark:text-white dark:bg-teal-900 h-full pb-20">
           <Navbar />
           {children}
-          <div className="flex absolute left-0 bottom-0 w-full h-20 dark:bg-[#0a001778]">
+          <div className="flex absolute left-0 bottom-0 w-full h-20 dark:bg-[#302b2b]">
             <div className="flex w-full md:w-1/2 items-center h-full pl-8">
               <div className="flex text-xl gap-4 items-center">
                 <a

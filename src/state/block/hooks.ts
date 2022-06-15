@@ -5,7 +5,7 @@ import { AppDispatch, AppState, useAppSelector } from '@/src/state/store'
 import { useChainId } from '../network/hooks'
 import { getRpcProvider } from '../../utils/rpc'
 
-const REFRESH_BLOCK_INTERVAL = 30000
+const REFRESH_BLOCK_INTERVAL = 10000
 export const FAST_INTERVAL = 100000
 export const SLOW_INTERVAL = 60000
 

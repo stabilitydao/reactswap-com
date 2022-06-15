@@ -37,7 +37,7 @@ export default function Web3Status() {
       {account ? (
           <button className="bg-orange-300 dark:bg-teal-800 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>{shortenAddress(account)}</button>
       ) : (
-        <button className="flex items-center dark:bg-indigo-700 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>
+        <button className="flex items-center dark:bg-blue-800 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>
           <BiWallet className="text-xl md:hidden" /> <span className="hidden md:flex">Connect wallet</span>
         </button>
       )}

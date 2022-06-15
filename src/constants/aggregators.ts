@@ -3,6 +3,7 @@ import { SwapAggregator } from '@/src/interfaces/SwapAggregator'
 import { AggregatorId } from '@/src/enums/AggregatorId'
 import { OneInch } from '@/src/agg/OneInch'
 import { ZeroX } from '@/src/agg/ZeroX'
+import { OpenOcean } from '@/src/agg/OpenOcean'
 
 export const aggregators: {[chainId in ChainId|number]: {
   [aggId in AggregatorId|string]: SwapAggregator}
@@ -17,8 +18,25 @@ export const aggregators: {[chainId in ChainId|number]: {
       ChainId.POLYGON,
       'https://polygon.api.0x.org/swap/v1/',
       '/img/0x.webp'
+    ),
+    [AggregatorId.OpenOcean]: new OpenOcean(
+      ChainId.POLYGON,
+      'https://open-api.openocean.finance/v3/polygon/',
+      '/img/openocean.png'
     )
   },
+}
+
+export const sourceMappingOpenOceanOneInch: {[chainId in ChainId]: {
+  [id:string]: string
+}} = {
+  [ChainId.POLYGON]: {
+    Quickswap: "POLYGON_QUICKSWAP",
+    Synapse: "POLYGON_SYNAPSE",
+    UniswapV3: "POLYGON_UNISWAP_V3",
+    ClipperRFQ: "POLYGON_ONE_INCH_LIMIT_ORDER_V2",
+    KyberSwap: "POLYGON_KYBER_DMM",
+  }
 }
 
 export const sourceMappingZeroXOneInch: {[chainId in ChainId]: {
