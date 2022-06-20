@@ -57,15 +57,13 @@ Next-gen AMM DeX.
 #### Proposed features
 
 * various AMM liquidity pool types support
-  * [V0 testnet] R-pool: 2 tokens, Uniswap invariant (constant-product formula) (its AMM-V1 RLP was implemented in ReactSwap V0)
-  * U-pool: 2 tokens, Uniswap invariant (constant product formula), price ranges, 5 types of pool fee
-  * B-pool: 2-16 tokens, constant average formula/value function, different pool weight,
-  * C-pools: 2-8 tokens, Stableswap invariant (hybrid formula)
+  * S-pool: 2 tokens, volatile (x*y) and stable (x3y+y3x) pools
+  * U-pool: 2 tokens, volatile (x*y), price ranges, 5 types of pool fee
+  * B-pool: 2-16 tokens, constant average formula/value function, different pool weight
 * liquidity incentive platform
-  * [V0 testnet] classic Farms and Pools (its ReactFarm and React Pools implemented in ReactSwap V0) 
-  * User liquidity farms
-  * User rewarding pools
-* liquidity lock / provider and token certification
+  * Farms
+  * User farms
+* liquidity lock NFT, provider and token certification
 * leverage lending & trading
 
 Status: idea

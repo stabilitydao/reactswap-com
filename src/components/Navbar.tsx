@@ -52,7 +52,7 @@ function Navbar() {
         href="/"
         className="flex"
       >
-        <img src="/img/react.png" className="h-10 w-10" alt="" />{' '}
+        <img src="/img/react.gif" className="h-12 w-12" alt="" />{' '}
         <h1 className=" ml-3 self-center font-bold text-2xl hidden md:flex">ReactSwap</h1>
       </a>
       <ToastContainer
