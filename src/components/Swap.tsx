@@ -31,6 +31,7 @@ import { OneInchLiquiditySource } from '@/src/types/AggApiTypes'
 // import { useAllTokens } from '@/src/hooks/useTokenList'
 // import { ChainId } from '@/src/enums/ChainId'
 import { currencyId } from '@/src/utils/currencyId'
+import { toast } from 'react-toastify';
 
 function Swap() {
   // console.log('Swap render')
@@ -355,14 +356,16 @@ function Swap() {
 
         response.wait(1).then(() => {
           setPendingSwap(false)
+          toast.success('Swap done')
         }).catch(() => {
           setPendingSwap(false)
-          console.log('swap failed')
+          toast.error('Swap failed')
         })
       }).catch((error) => {
         setPendingSwap(false)
         console.error(`Swap failed`, error)
-        throw new Error(`Swap failed`)
+        toast.error('Swap failed')
+        // throw new Error(`Swap failed`)
       })
     }
   }, [
@@ -476,8 +479,8 @@ function Swap() {
           </div>
         }
 
-        <div className="flex mt-10 w-full max-w-sm">
-          {insufficientBalance && (
+        <div className="flex mt-10 w-full max-w-sm flex-col">
+          {insufficientBalance && !pendingSwap && (
             <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
           )}
           {needToApprove && (
@@ -490,8 +493,7 @@ function Swap() {
             </div>
           )}
           {canSwap && !pendingSwap && (
-            <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>
-          )}
+            <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>          )}
           {pendingSwap && (
             <div className="w-full justify-center flex items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
               <span className="mr-4">pending swap</span>

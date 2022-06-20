@@ -6,6 +6,8 @@ import { selectNetworkName } from '@/src/state/network'
 import { useChainId } from '@/src/state/network/hooks'
 import Web3Status from '@/components/Web3Status'
 import { networks } from '@/src/constants/networks'
+import { Theme, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 function Navbar() {
   const [Mounted, setMounted] = useState(false)
@@ -53,6 +55,12 @@ function Navbar() {
         <img src="/img/react.png" className="h-10 w-10" alt="" />{' '}
         <h1 className=" ml-3 self-center font-bold text-2xl hidden md:flex">ReactSwap</h1>
       </a>
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        closeOnClick
+        theme={theme as Theme}
+      />
       <div className="flex items-center">
         <div className="mr-4">
           <Web3Status />
