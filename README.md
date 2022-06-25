@@ -29,20 +29,22 @@ Dev budget: 50k PROFIT [executed proposal](https://www.tally.xyz/governance/eip1
 
 ### MVP-2: Crypto trading
 
-Decentralized crypto trading and analytic service.
+Decentralized crypto trading and analytics
 
 #### Features
 
 * price chart for any pair
-* technical analysis gauges
-* top traders, competitions
 * tokens and DeXs analytics
+* swap to earn NFT
 
 Status: research
 
 ### MVP-3: Cross-chain swap
 
 Cross-chain swap service.
+
+#### Proposed integrations
+* Connext [api docs](https://docs.connext.network)
 
 Status: waiting for second network support
 
@@ -54,17 +56,21 @@ Status: exploring orderbook protocols
 
 Next-gen AMM DeX.
 
+#### Factories
+
+* S-pool factory. Solidly volatile (x*y) and stable (x3y+y3x) pools.
+* U-pool factory. Uniswap volatile (x*y) pools with price ranges.
+* B-pool factory. Balancer pools: 2-16 tokens, constant average formula/value function, different pool weight.
+
+#### Incentives
+
+Cronje's ve-3,3: lock REACT for veREACT and vote for gauge, reward voters by bribes.
+
 #### Proposed features
 
-* various AMM liquidity pool types support
-  * S-pool: 2 tokens, volatile (x*y) and stable (x3y+y3x) pools
-  * U-pool: 2 tokens, volatile (x*y), price ranges, 5 types of pool fee
-  * B-pool: 2-16 tokens, constant average formula/value function, different pool weight
-* liquidity incentive platform
-  * Farms
-  * User farms
-* liquidity lock NFT, provider and token certification
-* leverage lending & trading
+* U-pool: remove liquidity on out of range
+* private pools
+* liquidity lock gauge
 
 Status: idea
 
