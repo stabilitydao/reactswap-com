@@ -27,24 +27,27 @@ export default function CommonBases({
   chainId,
   onSelect,
   selectedCurrency,
+  otherCurrency,
 }: {
   chainId: ChainId
   selectedCurrency?: Currency | null
+  otherCurrency?: Currency | null
   onSelect: (currency: Currency) => void
 }) {
 
   return bases[chainId].length > 0 ? (
     <div className="flex flex-wrap">
       {bases[chainId].map((currency: Currency) => {
-        const isSelected = selectedCurrency?.equals(currency)
+        const isSelected = selectedCurrency?.equals(currency) || otherCurrency?.equals(currency)
         return (
           <BaseWrapper
             onClick={() => !isSelected && onSelect(currency)}
             disable={isSelected}
             key={currency.symbol}
+            className="hover:dark:bg-[#2f2929]"
           >
             <CurrencyLogoFromList currency={currency} />
-            <div className="text-sm">
+            <div className="text-sm font-bold">
               {currency.symbol}
             </div>
           </BaseWrapper>

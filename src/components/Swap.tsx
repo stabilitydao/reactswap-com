@@ -426,7 +426,7 @@ function Swap() {
   return (
     <div className="flex container max-w-4xl mt-5 md:mt-0 mb-10 flex-wrap">
       <div className="flex w-full md:w-1/2 flex-col items-center">
-        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+        <div className="flex flex-col max-w-sm lg:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
           <div className="flex text-sm pl-2">You sell</div>
           <CurrencyInputPanel
             field={Field.INPUT}
@@ -451,7 +451,7 @@ function Swap() {
             />
           </div>
         </div>
-        <div className="flex flex-col max-w-sm lg:max-w-md dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+        <div className="flex flex-col max-w-sm lg:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
           <div className="flex text-sm pl-2">You buy</div>
           <CurrencyInputPanel
             field={Field.OUTPUT}
@@ -505,7 +505,7 @@ function Swap() {
       <div className="flex w-full mt-10 md:mt-0 md:w-1/2 md:pl-5 flex-col items-center">
 
         {Object.keys(quotes).length > 0 &&
-          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 dark:border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
             <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
             {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
               const isBest = Object.keys(quotes).length > 1 && index == 0

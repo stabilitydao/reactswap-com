@@ -19,6 +19,8 @@ import CommonBases from '@/src/components/CommonBases'
 import CurrencyList from './CurrencyList'
 import ImportRow from './ImportRow'
 
+import AutoSizer from 'react-virtualized-auto-sizer'
+
 const ContentWrapper = styled.div`
   width: 100%;
   flex: 1 1;
@@ -30,11 +32,8 @@ const Footer = styled.div`
   bottom: 0;
   width: 100%;
   border-radius: 20px;
-  padding: 20px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-  background-color: ${({ theme }) => theme.bg1};
-  border-top: 1px solid ${({ theme }) => theme.bg2};
 `
 
 interface CurrencySearchProps {
@@ -167,9 +166,9 @@ export function CurrencySearch({
           </span>
           <X onClick={onDismiss} className="cursor-pointer" />
         </div>
-        <div className="flex w-full">
+        <div className="flex w-full mb-1">
           <input
-            className="px-4 py-2 text-lg w-full"
+            className="px-4 py-2 text-lg w-full mx-3 rounded-2xl dark:outline-0 dark:bg-[#413636]"
             type="text"
             id="token-search-input"
             placeholder={`Search name or paste address`}
@@ -181,7 +180,7 @@ export function CurrencySearch({
           />
         </div>
         {showCommonBases && chainId && (
-          <CommonBases chainId={chainId} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
+          <CommonBases chainId={chainId} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} otherCurrency={otherSelectedCurrency} />
         )}
       </div>
       <br />
@@ -190,19 +189,23 @@ export function CurrencySearch({
           <ImportRow token={searchToken} showImportView={showImportView} setImportToken={setImportToken} />
         </div>
       ) : filteredSortedTokens?.length > 0 || filteredInactiveTokens?.length > 0 ? (
-        <div className="flex-1 w-full">
-          <CurrencyList
-            height={430}
-            currencies={disableNonToken ? filteredSortedTokens : filteredSortedTokensWithETH}
-            otherListTokens={filteredInactiveTokens}
-            onCurrencySelect={handleCurrencySelect}
-            otherCurrency={otherSelectedCurrency}
-            selectedCurrency={selectedCurrency}
-            fixedListRef={fixedList}
-            showImportView={showImportView}
-            setImportToken={setImportToken}
-            showCurrencyAmount={showCurrencyAmount}
-          />
+        <div className="flex-1 w-full" style={{height: 'calc(80vh - 288px)'}}>
+          <AutoSizer disableWidth>
+            {({ height }) => (
+              <CurrencyList
+                height={height}
+                currencies={disableNonToken ? filteredSortedTokens : filteredSortedTokensWithETH}
+                otherListTokens={filteredInactiveTokens}
+                onCurrencySelect={handleCurrencySelect}
+                otherCurrency={otherSelectedCurrency}
+                selectedCurrency={selectedCurrency}
+                fixedListRef={fixedList}
+                showImportView={showImportView}
+                setImportToken={setImportToken}
+                showCurrencyAmount={showCurrencyAmount}
+              />
+            )}
+          </AutoSizer>
         </div>
       ) : (
         <div className="p-5 h-full">
@@ -211,8 +214,8 @@ export function CurrencySearch({
           </div>
         </div>
       )}
-      <Footer className=" dark:bg-indigo-900">
-        <div onClick={showManageView} className="w-full flex cursor-pointer">
+      <Footer onClick={showManageView} className="cursor-pointer dark:border-t-2 p-4 hover:dark:bg-[#2f2929]">
+        <div className="w-full flex justify-center ">
           <div className="mr-4">
             <Edit />
           </div>

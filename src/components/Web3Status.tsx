@@ -37,7 +37,7 @@ export default function Web3Status() {
       {account ? (
           <button className="bg-orange-300 dark:bg-teal-800 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>{shortenAddress(account)}</button>
       ) : (
-        <button className="flex items-center dark:bg-blue-800 px-4 h-10 rounded-2xl" onClick={toggleWalletModal}>
+        <button className="flex items-center dark:bg-green-800 px-5 h-10 rounded-2xl" onClick={toggleWalletModal}>
           <BiWallet className="text-xl md:hidden" /> <span className="hidden md:flex">Connect wallet</span>
         </button>
       )}
@@ -54,7 +54,7 @@ export default function Web3Status() {
           <div className="flex flex-col w-full">
             <div className="flex justify-center text-lg text-center w-full py-3">Choose your wallet</div>
             <div className="flex w-full items-center justify-center flex-col">
-              <button className="flex btn bg-amber-700 px-5 text-xl" onClick={connect}>Metamask / browser wallet</button>
+              <button className="flex btn bg-amber-200 dark:bg-amber-700 px-5 text-xl" onClick={connect}>Metamask / browser wallet</button>
             </div>
           </div>
         )}

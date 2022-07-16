@@ -51,10 +51,10 @@ export default function Manage({
       <br />
       <div className="flex flex-col pb-0">
         <ToggleWrapper className="flex mb-4">
-          <div className={showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-blue-600 bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
+          <div className={showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-[#9e7a7c] bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
             <span>Lists</span>
           </div>
-          <div className={!showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-blue-600 bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
+          <div className={!showLists ? "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-[#9e7a7c] bg-blue-400 w-1/2 py-1.5" : "flex justify-center items-center text-xl font-bold rounded-2xl dark:bg-transparent bg-transparent w-1/2 cursor-pointer py-1.5"} onClick={() => setShowLists(!showLists)}>
             <span>Tokens</span>
           </div>
         </ToggleWrapper>

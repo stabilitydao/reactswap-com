@@ -96,7 +96,7 @@ export default function ManageTokens({
         <div className="flex flex-col gap-2">
           <div className="flex">
             <input
-              className="w-full  px-3 text-xl"
+              className="w-full px-3 py-1.5 rounded-2xl text-xl"
               type="text"
               id="token-search-input"
               placeholder={'0x0000'}

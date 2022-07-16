@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 body {
-  @apply dark:text-white bg-indigo-300 dark:bg-indigo-900;
+  @apply dark:text-white bg-indigo-300 dark:bg-indigo-900 p-0  overflow-x-hidden;
 }
 html {
   min-width: 375px;

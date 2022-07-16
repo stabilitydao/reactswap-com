@@ -155,7 +155,7 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
       key={listUrl}
       id={listUrlRowHTMLId(listUrl)}
     >
-      <div className={isActive ? "flex w-full p-5 rounded-3xl bg-blue-400 dark:bg-blue-600" : "flex w-full p-5 bg-transparent"}>
+      <div className={isActive ? "flex w-full p-5 rounded-3xl bg-blue-400 dark:bg-[#9e7a7c]" : "flex w-full p-5 bg-transparent"}>
       {list.logoURI ? (
         <ListLogo style={{ width: 40, height: 40, marginRight: '1rem' }} logoURI={list.logoURI} alt={`${list.name} list logo`} />
       ) : (
@@ -334,7 +334,7 @@ export function ManageLists({
       <div className="flex flex-col gap-4">
         <div className="flex">
           <input
-            className="w-full mx-5 px-3 text-xl"
+            className="w-full mx-5 px-3 py-1.5 rounded-2xl text-xl"
             type="text"
             id="list-add-input"
             placeholder={`https:// or ipfs://`}

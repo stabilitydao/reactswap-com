@@ -136,7 +136,7 @@ function CurrencyRow({
   return (
     <MenuItem
       style={style}
-      className={`border-0 token-item-${key}`}
+      className={`border-0 token-item-${key} hover:dark:bg-[#2f2929]`}
       onClick={() => (isSelected ? null : onSelect())}
       disabled={isSelected}
       selected={otherSelected}
@@ -238,7 +238,7 @@ export default function CurrencyList({
 
       const currency = row
 
-      const isSelected = Boolean(currency && selectedCurrency && selectedCurrency.equals(currency))
+      const isSelected = Boolean(currency && selectedCurrency && selectedCurrency.equals(currency)) || Boolean(otherCurrency && otherCurrency && otherCurrency.equals(currency))
       const otherSelected = Boolean(currency && otherCurrency && otherCurrency.equals(currency))
       const handleSelect = () => currency && onCurrencySelect(currency)
 

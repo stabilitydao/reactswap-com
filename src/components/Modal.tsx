@@ -13,7 +13,6 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
     z-index: 2;
     background-color: transparent;
     overflow: hidden;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,6 +51,10 @@ const StyledDialogContent = styled(({ minHeight, maxHeight, mobile, isOpen, ...r
       `}
     display: flex;
     border-radius: 20px;
+    
+    @media (max-width: 768px) {
+      width: 90vw;
+    }
   }
 `
 
@@ -115,7 +118,7 @@ export default function Modal({
                 minHeight={minHeight}
                 maxHeight={maxHeight}
                 mobile={isMobile}
-                className="bg-orange-50 dark:bg-indigo-900 shadow-2xl"
+                className="bg-[#fffcf6] dark:bg-[#211c1c] shadow-2xl"
               >
                 {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
                 {!initialFocusRef && isMobile ? <div tabIndex={1} /> : null}

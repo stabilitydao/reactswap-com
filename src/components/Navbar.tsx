@@ -12,6 +12,8 @@ import 'react-toastify/dist/ReactToastify.css';
 function Navbar() {
   const [Mounted, setMounted] = useState(false)
   const { setTheme, systemTheme, theme } = useTheme()
+  const currentTheme = theme === 'system' ? systemTheme : theme
+  const isDark = Mounted && currentTheme === 'dark'
 
   const chainId = useChainId()
   const currentNetworkName = useSelector(selectNetworkName)
@@ -21,9 +23,11 @@ function Navbar() {
   }, [])
 
   const themeChanger = () => {
-    if (!Mounted) return null
-    const currentTheme = theme === 'system' ? systemTheme : theme
-    if (currentTheme === 'dark') {
+    if (!Mounted) {
+      return null
+    }
+
+    if (isDark) {
       return (
         <SunIcon
           className="w-7 h-7 text-amber-500"
@@ -65,7 +69,12 @@ function Navbar() {
         <div className="mr-4">
           <Web3Status />
         </div>
-        <div className="flex items-center mr-4 px-4 h-10 rounded-xl dark:bg-black ">
+        <div
+          className={`flex items-center mr-4 px-5 h-10 rounded-xl`}
+          style={{
+            background: isDark ? networks[chainId].darkBg ?? 'black' : networks[chainId].bg ?? 'transparent',
+          }}
+        >
           <img
             src={networks[chainId].logo} alt={networks[chainId].name}
             className="w-7 h-7"
