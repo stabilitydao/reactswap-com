@@ -87,8 +87,8 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                   const toLogoURI = getCurrencyLogoURI(token)
 
                   return (
-                    <div key={'' + index + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-transparent m-3 pt-3 pb-2 px-2 rounded-2xl">
-                      <div className="text-sm flex justify-center mb-3 items-center">
+                    <div key={'' + index + fromTokenAddr + toTokenAddr} className="flex-col dark:bg-transparent m-1 pt-3 pb-2 px-2 rounded-2xl">
+                      <div className="text-sm flex justify-center mb-1 items-center">
                         {fromLogoURI ?
                           <img src={fromLogoURI} className="w-7 h-7 rounded-full m-1" title={fromToken?.symbol} alt={fromToken?.symbol}  />
                           :
@@ -106,7 +106,7 @@ function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
                           return (
                             <div key={'' + index + fromTokenAddr + toTokenAddr + liquidityPoolRoute.name} className="flex text-sm">
                               {inchSources[liquidityPoolRoute.name] && (
-                                <img className="h-9 w-9 mx-1.5 my-1.5" src={inchSources[liquidityPoolRoute.name].img_color} alt={liquidityPoolRoute.name} title={inchSources[liquidityPoolRoute.name].title} />
+                                <img className="h-6 w-6 mx-1.5 my-1.5" src={inchSources[liquidityPoolRoute.name].img_color} alt={liquidityPoolRoute.name} title={inchSources[liquidityPoolRoute.name].title} />
                               )}
                             </div>
                           )

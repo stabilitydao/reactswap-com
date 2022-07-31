@@ -26,60 +26,23 @@ import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
 import Routing from '@/components/Routing'
 import { OneInchLiquiditySource } from '@/src/types/AggApiTypes'
-// import useCurrency from '@/src/hooks/useCurrency'
-// import { TOKEN_SHORTHANDS } from '@/src/constants/currencies'
-// import { useAllTokens } from '@/src/hooks/useTokenList'
-// import { ChainId } from '@/src/enums/ChainId'
 import { currencyId } from '@/src/utils/currencyId'
 import { toast } from 'react-toastify';
+import { chainIdMapping, DexScreener, Pair } from '@/src/dexData/DexScreener'
+import { currencyAddress } from '@/src/utils/currencyAddress'
+import DexScreenerChart from '@/components/DexScreenerChart'
+import ConnectWallet from '@/components/ConnectWallet'
+import { ChainId } from '@/src/enums/ChainId'
 
 function Swap() {
   // console.log('Swap render')
+  const router = useRouter()
   const chainId = useChainId()
   const { account, library } = useActiveWeb3React()
+
+  // updates the swap state to use the defaults for a given network and url query string
   /*const loadedUrlParams =*/ useDefaultsFromURLSearch(chainId)
-
-  const router = useRouter()
-
-  const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
-  const allowanceTarget:string = metarouter[chainId]
-  const [pendingApproval, setPendingApproval] = useState<boolean>(false)
-  const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
-  const [approved, setApproved] = useState<boolean>(false)
-  const [txData, setTxData] = useState<TransactionRequest|undefined>()
-  const [pendingSwap, setPendingSwap] = useState<boolean>(false)
-
-  /*const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency(loadedUrlParams?.inputCurrencyId),
-    useCurrency(loadedUrlParams?.outputCurrencyId),
-  ]*/
-  /*const urlLoadedTokens: Token[] = useMemo(
-    () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c instanceof Token) ?? [],
-    [loadedInputCurrency, loadedOutputCurrency],
-  )*/
-
-  /*const defaultTokens = useAllTokens()
-  const importTokensNotInDefault = useMemo(
-    () =>
-      urlLoadedTokens &&
-      urlLoadedTokens
-        .filter((token: Token) => {
-          return !Boolean(token.address in defaultTokens)
-        })
-        .filter((token: Token) => {
-          // Any token addresses that are loaded from the shorthands map do not need to show the import URL
-          const supported = chainId in ChainId
-          if (!supported) return true
-          return !Object.keys(TOKEN_SHORTHANDS).some((shorthand) => {
-            const shorthandTokenAddress = TOKEN_SHORTHANDS[shorthand][chainId]
-            return shorthandTokenAddress && shorthandTokenAddress === token.address
-          })
-        }),
-    [chainId, defaultTokens, urlLoadedTokens]
-  )*/
-
   const { inputValue } = useSwapState()
-
   const {
     allowedSlippage,
     parsedAmount,
@@ -88,45 +51,118 @@ function Swap() {
     inputBalance,
   } = useDerivedSwapInfo()
 
+  // component state
+  const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
+  const [pendingApproval, setPendingApproval] = useState<boolean>(false)
+  const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
+  const [approved, setApproved] = useState<boolean>(false)
+  const [txData, setTxData] = useState<TransactionRequest|undefined>()
+  const [pendingSwap, setPendingSwap] = useState<boolean>(false)
+  const [slippageInput, setSlippageInput] = useState(allowedSlippage.toFixed(1))
+  const [slippageError, setSlippageError] = useState<'invalid input' | false>(false)
+  const [oneInchSources, setOneInchSources] = useState<{[id:string]:OneInchLiquiditySource}>({})
+  const [chartPairAddress, setChartPairAddress] = useState<string|undefined>()
+  const [pairs, setPairs] = useState<{[id:string]:Pair}>({})
+  const [seconds, setSeconds] = useState(0);
+
   // console.debug('inputCurrency:', inputCurrency?.symbol)
+  // console.debug('outputCurrency:', outputCurrency?.symbol)
   // console.debug('inputBalance:', inputBalance)
   // console.log('allowedSlippage', allowedSlippage.toFixed())
 
-  const maxInputAmount: CurrencyAmount<Currency> | undefined = useMemo(
-    () => maxAmountSpend(inputBalance),
-    [inputBalance]
-  )
+  // auto update quotes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds(seconds => seconds + 10);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
+  // quoting tokens data
+  const inputTokenAddress = inputCurrency ? currencyAddress(inputCurrency) : undefined
+  const outputTokenAddress = outputCurrency ? currencyAddress(outputCurrency) : undefined
+  const dexScreener = new DexScreener()
+  useEffect(() => {
+    // console.log('input output token effect')
+    let isSubscribed = true
+    const loadTokensData = async () => {
+      if (inputTokenAddress && outputTokenAddress) {
+        const inputPairs = await dexScreener.getTokens([inputTokenAddress])
+        // console.log(a)
+        const outputPairs = await dexScreener.getTokens([outputTokenAddress])
+        const foundPairs:{[id:string]:Pair} = {};
+
+        [...inputPairs?.pairs || [], ...outputPairs?.pairs || []]
+          .filter(pair => pair.chainId == chainIdMapping[ChainId.POLYGON])
+          .forEach(pair => {
+            foundPairs[pair.pairAddress] = pair
+        })
+        if (isSubscribed) {
+          setPairs(foundPairs)
+        }
+      }
+    }
+
+    loadTokensData()
+    return () => {isSubscribed = false}
+  }, [inputTokenAddress, outputTokenAddress])
+
+  useEffect(() => {
+    let isSubscribed = true
+    if (!chartPairAddress || !Object.keys(pairs).includes(chartPairAddress)) {
+      let bestPair
+      Object.keys(pairs).forEach(pairAddr => {
+        const pair = pairs[pairAddr]
+        if (
+          (
+            pair.baseToken.address == inputTokenAddress
+            && pair.quoteToken.symbol == (outputCurrency?.isToken ? outputCurrency.symbol : outputCurrency?.wrapped.symbol)
+          ) || (
+            pair.baseToken.address == outputTokenAddress
+            && pair.quoteToken.symbol == (inputCurrency?.isToken ? inputCurrency.symbol : inputCurrency?.wrapped.symbol)
+          )
+        ) {
+          bestPair = pairAddr
+          // setChartPairAddress(pairAddr)
+        }
+      })
+
+      if (!bestPair && Object.keys(pairs).length > 0) {
+        bestPair = pairs[Object.keys(pairs)[0]].pairAddress
+      }
+
+      if (isSubscribed) {
+        setChartPairAddress(bestPair)
+      }
+    }
+    return () => {isSubscribed = false}
+  }, [JSON.stringify(pairs)])
+
+
+  // Quoting DeX aggregators for swap quotes
   useEffect(() => {
     let isSubscribed = true
     // console.log('Quote effect hook. deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString(), allowedSlippage.quotient.toString())
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
-        if (
-          !quotes[aggId]
-          || quotes[aggId]?.inputAmount != parsedAmount.quotient.toString()
-          || quotes[aggId]?.outputCurrencyId != currencyId(outputCurrency)
-        ) {
-          console.log(`Quoting ${aggId}..`)
-          aggregators[chainId][aggId].getQuote(
-            inputCurrency,
-            outputCurrency,
-            parsedAmount,
-            parseFloat(allowedSlippage.toFixed(2)),
-            account ?? undefined
-          ).then((quote:SwapQuote) => {
-            console.log(`${aggId} reply quote data:`, quote)
-            if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
-              if (isSubscribed) {
-                // setQuotes(q => ({...q, [aggId]: quote}))
-                // sort
-                setQuotes(q => Object.entries({...q, [aggId]: quote})
-                  .sort(([,a],[,b]) => b?.outputAmountFixed && a?.outputAmountFixed ? parseFloat(b.outputAmountFixed) - parseFloat(a.outputAmountFixed) : 0)
-                  .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}))
-              }
+        console.log(`Quoting ${aggId}..`)
+        aggregators[chainId][aggId].getQuote(
+          inputCurrency,
+          outputCurrency,
+          parsedAmount,
+          parseFloat(allowedSlippage.toFixed(2)),
+          account ?? undefined
+        ).then((quote:SwapQuote) => {
+          console.log(`${aggId} reply quote data:`, quote)
+          if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
+            if (isSubscribed) {
+              // setQuotes(q => ({...q, [aggId]: quote}))
+              setQuotes(q => Object.entries({...q, [aggId]: quote})
+                .sort(([,a],[,b]) => b?.outputAmountFixed && a?.outputAmountFixed ? parseFloat(b.outputAmountFixed) - parseFloat(a.outputAmountFixed) : 0)
+                .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}))
             }
-          })
-        }
+          }
+        })
       }
     }
 
@@ -136,9 +172,11 @@ function Swap() {
     inputCurrency?.symbol,
     outputCurrency?.symbol,
     parsedAmount?.quotient.toString(),
-    allowedSlippage.quotient.toString()
+    allowedSlippage.quotient.toString(),
+    seconds
   ])
 
+  // calculate best swap quote
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
     let bestQuote: SwapQuote|undefined
     Object.keys(quotes).forEach(aggId => {
@@ -157,7 +195,6 @@ function Swap() {
   }, [
     JSON.stringify(quotes)
   ])
-
   // console.log('Quotes:', quotes)
   // console.log('BestQuote:', bestQuote)
 
@@ -166,9 +203,8 @@ function Swap() {
     inputBalance && parsedAmount?.greaterThan(inputBalance)
 
   // check approval
+  const allowanceTarget:string = metarouter[chainId]
   const [approval, approveCallback] = useApproval(parsedAmount, allowanceTarget, pendingApproval)
-
-  // console.log('Approval state:', approval)
 
   useEffect(() => {
     if (approval === ApprovalState.NOT_APPROVED && !pendingApproval && !approvalSubmitted) {
@@ -194,9 +230,10 @@ function Swap() {
     && !inputCurrency?.isNative
     && approval === ApprovalState.NOT_APPROVED
     && !approved
+  // console.log('Approval state:', approval)
+  // console.log('Need to approve:', needToApprove)
 
-
-  // build tx
+  // build swap tx
   useEffect(() => {
     let isSubscribed = true
     const getTxData = async () => {
@@ -243,9 +280,6 @@ function Swap() {
     insufficientBalance,
     allowedSlippage.quotient.toString()
   ])
-
-  // console.log('Swap tx:', txData)
-
   const canSwap =
     inputCurrency
     && outputCurrency
@@ -255,8 +289,32 @@ function Swap() {
     && bestQuote
     && !insufficientBalance
     && txData
+  // console.log('Swap tx:', txData)
+  // console.log('canSwap:', canSwap)
 
+  // ui action handlers
   const { onSwitchTokens, onCurrencySelection, onUserInput } = useSwapActionHandlers()
+
+  function handleChangeSlippageInput(value: string) {
+    // populate what the user typed and clear the error
+    setSlippageInput(value)
+    setSlippageError(false)
+
+    if (value.length === 0) {
+      setUserSlippageTolerance('auto')
+    } else {
+      const parsed = Math.floor(Number.parseFloat(value) * 100)
+
+      if (!Number.isInteger(parsed) || parsed < 0 || parsed > 5000) {
+        setUserSlippageTolerance('auto')
+        if (value !== '.') {
+          setSlippageError('invalid input')
+        }
+      } else {
+        setUserSlippageTolerance(new Percent(parsed, 10_000))
+      }
+    }
+  }
 
   const handleTypeInput = useCallback(
     (value: string) => {
@@ -301,6 +359,11 @@ function Swap() {
       setQuotes({})
     },
     [onCurrencySelection, inputCurrency, chainId, inputValue]
+  )
+
+  const maxInputAmount: CurrencyAmount<Currency> | undefined = useMemo(
+    () => maxAmountSpend(inputBalance),
+    [inputBalance]
   )
 
   const handleMaxInput = useCallback(() => {
@@ -375,164 +438,181 @@ function Swap() {
     outputCurrency?.symbol
   ])
 
-  // const userSlippageTolerance = useUserSlippageTolerance()
   const setUserSlippageTolerance = useSetUserSlippageTolerance()
-  const [slippageInput, setSlippageInput] = useState(allowedSlippage.toFixed(1))
-  const [slippageError, setSlippageError] = useState<'invalid input' | false>(false)
 
-  function parseSlippageInput(value: string) {
-    // populate what the user typed and clear the error
-    setSlippageInput(value)
-    setSlippageError(false)
-
-    if (value.length === 0) {
-      setUserSlippageTolerance('auto')
-    } else {
-      const parsed = Math.floor(Number.parseFloat(value) * 100)
-
-      if (!Number.isInteger(parsed) || parsed < 0 || parsed > 5000) {
-        setUserSlippageTolerance('auto')
-        if (value !== '.') {
-          setSlippageError('invalid input')
-        }
-      } else {
-        setUserSlippageTolerance(new Percent(parsed, 10_000))
-      }
-    }
-  }
-
-  const [oneInchSources, setOneInchSources] = useState<{[id:string]:OneInchLiquiditySource}>({})
-
+  // load 1Inch liquidity sources for DeX logo images
   useEffect(() => {
-    // console.log('get liquidity sources')
     const run = async () => {
       const ls = await aggregators[chainId][AggregatorId.OneInch].getSources()
       const sources: {[id:string]:OneInchLiquiditySource} = {}
-
       ls.forEach((source: OneInchLiquiditySource) => {
         if (source.id) {
           sources[source.id] = source
         }
       })
-
-      // console.debug(sources)
+      // console.debug('1Inch sources: ', sources)
       setOneInchSources(sources)
     }
-
     run()
-
   }, [])
 
   return (
-    <div className="flex container max-w-4xl mt-5 md:mt-0 mb-10 flex-wrap">
-      <div className="flex w-full md:w-1/2 flex-col items-center">
-        <div className="flex flex-col max-w-sm lg:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-          <div className="flex text-sm pl-2">You sell</div>
-          <CurrencyInputPanel
-            field={Field.INPUT}
-            value={inputValue}
-            onUserInput={handleTypeInput}
-            onCurrencySelect={handleInputSelect}
-            currency={inputCurrency}
-            otherCurrency={outputCurrency}
-            onMax={handleMaxInput}
-          />
-        </div>
-        <div className="h-20 flex justify-center items-center">
-          <div title="Switch tokens">
-            <HiSwitchVertical
-              className="cursor-pointer"
-              size="32"
-              onClick={() => {
-                setApprovalSubmitted(false)
-                setQuotes({})
-                onSwitchTokens()
-              }}
+    <div className="flex w-full mt-5 md:mt-0 mb-10 flex-wrap lg:flex-nowrap justify-center gap-5" style={{maxWidth: 1500}}>
+      <div className="flex w-full flex-col md:flex-row lg:w-72 xl:w-full xl:max-w-md lg:flex-col items-center md:items-start mb-10 lg:justify-start">
+        <div className="flex w-full max-w-md flex-col items-center">
+          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+            <div className="flex text-sm pl-2">You sell</div>
+            <CurrencyInputPanel
+              field={Field.INPUT}
+              value={inputValue}
+              onUserInput={handleTypeInput}
+              onCurrencySelect={handleInputSelect}
+              currency={inputCurrency}
+              otherCurrency={outputCurrency}
+              onMax={handleMaxInput}
             />
           </div>
-        </div>
-        <div className="flex flex-col max-w-sm lg:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-          <div className="flex text-sm pl-2">You buy</div>
-          <CurrencyInputPanel
-            field={Field.OUTPUT}
-            value={bestQuote && bestQuote.outputAmountFixed ? bestQuote.outputAmountFixed : '0'}
-            onCurrencySelect={handleOutputSelect}
-            currency={outputCurrency}
-            otherCurrency={inputCurrency}
-          />
-        </div>
-
-        {canSwap &&
-          <div className="flex justify-start my-6 items-center">
-            <div className="flex w-44 justify-end mr-5">max slippage</div>
-            <div>
-              <input
-                style={{
-                  border: slippageError ? '2px solid red' : '2px solid transparent',
-                  backgroundColor: slippageError ? '#ff0000' : '',
+          <div className="h-20 flex justify-center items-center">
+            <div title="Switch tokens">
+              <HiSwitchVertical
+                className="cursor-pointer"
+                size="32"
+                onClick={() => {
+                  setApprovalSubmitted(false)
+                  setQuotes({})
+                  onSwitchTokens()
                 }}
-                onChange={(e) => parseSlippageInput(e.target.value)}
-                className="w-12 py-1 px-2 text-right"
-                value={slippageInput}
-              /> %
+              />
             </div>
           </div>
-        }
+          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+            <div className="flex text-sm pl-2">You buy</div>
+            <CurrencyInputPanel
+              field={Field.OUTPUT}
+              value={bestQuote && bestQuote.outputAmountFixed ? bestQuote.outputAmountFixed : '0'}
+              onCurrencySelect={handleOutputSelect}
+              currency={outputCurrency}
+              otherCurrency={inputCurrency}
+            />
+          </div>
 
-        <div className="flex mt-10 w-full max-w-sm flex-col">
-          {insufficientBalance && !pendingSwap && (
-            <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
-          )}
-          {needToApprove && (
-            <button className="w-full bg-teal-600 text-white dark:bg-blue-700 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
-          )}
-          {pendingApproval && (
-            <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
-              <span className="mr-4">pending approval</span>
-              <Loader stroke="#ffffff"/>
+          <div className="flex mt-10 mb-10 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+            {!inputValue && account &&
+              <div className="w-full">
+                Enter amount
+              </div>
+            }
+            {!account &&
+              <div className="w-full">
+                <ConnectWallet />
+              </div>
+            }
+            {canSwap &&
+              <div className="flex justify-start mb-4 items-center">
+                <div className="flex w-auto justify-end mr-5">max slippage</div>
+                <div>
+                  <input
+                    style={{
+                      border: slippageError ? '2px solid red' : '2px solid transparent',
+                      backgroundColor: slippageError ? '#ff0000' : '',
+                    }}
+                    onChange={(e) => handleChangeSlippageInput(e.target.value)}
+                    className="w-12 py-1 px-2 text-right"
+                    value={slippageInput}
+                  /> %
+                </div>
+              </div>
+            }
+
+            {insufficientBalance && !pendingSwap && (
+              <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
+            )}
+            {needToApprove && (
+              <button className="w-full bg-teal-600 text-white dark:bg-blue-700 text-xl font-bold h-10 px-5" onClick={handleApprove}>Approve MetaRouter</button>
+            )}
+            {pendingApproval && (
+              <div className="w-full flex justify-center items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
+                <span className="mr-4">pending approval</span>
+                <Loader stroke="#ffffff"/>
+              </div>
+            )}
+            {canSwap && !pendingSwap && (
+              <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>          )}
+            {pendingSwap && (
+              <div className="w-full justify-center flex items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
+                <span className="mr-4">pending swap</span>
+                <Loader stroke="#ffffff"/>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex w-full max-w-md flex-col lg:max-w-md lg:w-full xl:w-full xl:max-w-md mt-0 items-center">
+          {Object.keys(quotes).length > 0 &&
+            <div className="flex w-full max-w-sm lg:w-72 lg:max-w-md xl:w-full flex-col bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+              <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
+              {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
+                const isBest = Object.keys(quotes).length > 1 && index == 0
+
+                return (
+                  <div key={aggId} className="flex pl-2 py-2 items-center w-full">
+                    <img src={aggregators[chainId][aggId].logoURI} className="w-8 h-8" alt={aggId} title={aggId} />
+                    <div className="text-lg pl-4">
+                      {isBest ? (
+                        <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
+                      ) : quotes[aggId]?.outputAmountFixed}
+                      {quotes[aggId]?.error && (
+                        <span className="text-sm text-left">{quotes[aggId]?.error}</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              } )}
+              <div className="mt-4 flex text-sm pl-2 md:mb-2">Best routing</div>
+              <div>
+                {bestQuote &&
+                  <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
+                }
+              </div>
             </div>
-          )}
-          {canSwap && !pendingSwap && (
-            <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>          )}
-          {pendingSwap && (
-            <div className="w-full justify-center flex items-center dark:bg-blue-800 text-xl font-bold h-10 px-5">
-              <span className="mr-4">pending swap</span>
-              <Loader stroke="#ffffff"/>
-            </div>
-          )}
+          }
+
         </div>
       </div>
-      <div className="flex w-full mt-10 md:mt-0 md:w-1/2 md:pl-5 flex-col items-center">
+      <div className="flex w-full">
+        {chartPairAddress && (
+          <div className="flex flex-col w-full">
+            <div className="flex flex-col">
+              <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#392b2c] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-5"
+                      value={chartPairAddress}
+                      onChange={event => {
+                        const pair = event.target.value
+                        setChartPairAddress(pair)
+                        // console.log(event.target.value)
+                      }}
+              >
+                {Object.keys(pairs).map(pairAddr => {
+                  // console.log(pairs[pairAddr])
+                  const pair = pairs[pairAddr]
+                  return (
+                    <option
+                      value={pairAddr}
+                      key={pairAddr}
+                    >
+                      <div className="flex gap-4 w-full">
+                        {pair.baseToken.symbol}/{pair.quoteToken.symbol} on {pair.dexId}
+                        {` ${pairAddr.substring(0, 3 + 2)}...${pairAddr.substring(pairAddr.length - 3)} `}
+                        Liquidity: ${pair.liquidity?.usd},
+                        Volume 24h: ${pair.volume.h24}
+                      </div>
 
-        {Object.keys(quotes).length > 0 &&
-          <div className="flex md:ml-10 w-full max-w-sm lg:max-w-lg flex-col bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-            <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
-            {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
-              const isBest = Object.keys(quotes).length > 1 && index == 0
-
-              return (
-                <div key={aggId} className="flex pl-2 py-3 items-center w-full">
-                  <img src={aggregators[chainId][aggId].logoURI} className="w-12 h-12" alt={aggId} title={aggId} />
-                  <div className="text-lg pl-4">
-                    {isBest ? (
-                      <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
-                    ) : quotes[aggId]?.outputAmountFixed}
-                    {quotes[aggId]?.error && (
-                      <span className="text-sm text-left">{quotes[aggId]?.error}</span>
-                    )}
-                  </div>
-                </div>
-              )
-            } )}
-            <div className="mt-4 flex text-sm pl-2 md:mb-6">Best routing</div>
-            <div>
-              {bestQuote &&
-                <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
-              }
+                    </option>
+                  )
+                })}
+              </select>
             </div>
+            <DexScreenerChart pairAddress={chartPairAddress} />
           </div>
-        }
-
+        )}
       </div>
     </div>
   )

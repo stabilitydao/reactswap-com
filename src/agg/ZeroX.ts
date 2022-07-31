@@ -5,6 +5,7 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import axios from "axios";
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
+import { currencyId } from '@/src/utils/currencyId'
 
 export class ZeroX implements SwapAggregator {
   id: AggregatorId = AggregatorId.ZeroX
@@ -59,8 +60,16 @@ export class ZeroX implements SwapAggregator {
         allowanceTarget: data.allowanceTarget,
       }
     } catch (error) {
-      console.log(error)
-      throw new Error(JSON.stringify(error));
+      console.log(`${this.id} API error`, error)
+      return {
+        chainId: this.chainId,
+        protocolId: this.id,
+        inputCurrencyId: currencyId(token0),
+        inputAmount: amount.toFixed(0),
+        outputCurrencyId: currencyId(token1),
+        outputAmount: undefined,
+      }
+      // throw new Error(JSON.stringify(error));
     }
   }
 

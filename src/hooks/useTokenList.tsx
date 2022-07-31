@@ -11,6 +11,7 @@ import type { Ajv, ValidateFunction } from 'ajv'
 import { TokenAddressMap, useAllLists, useCombinedActiveList, useInactiveListUrls } from '@/src/state/lists/hooks'
 import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { useUserAddedTokens } from '@/src/state/user/hooks'
+import { UNSUPPORTED_TOKENS } from '@/src/constants/currencies'
 
 export const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -227,7 +228,9 @@ function useTokensFromMap(tokenMap: TokenAddressMap, includeUserAdded: boolean):
     // reduce to just tokens
     const mapWithoutUrls = Object.keys(tokenMap[chainId] ?? {}).reduce<{ [address: string]: Token }>(
       (newMap, address) => {
-        newMap[address] = tokenMap[chainId][address].token
+        if (!UNSUPPORTED_TOKENS[chainId].includes(address)) {
+          newMap[address] = tokenMap[chainId][address].token
+        }
         return newMap
       },
       {}
@@ -267,7 +270,7 @@ export async function validateTokenList(json: TokenList): Promise<TokenList> {
 
 export function useAllTokens(): { [address: string]: Token } {
   const allTokens = useCombinedActiveList()
-  // console.log(allTokens)
+  // console.log('useAllTokensMap', allTokens)
   return useTokensFromMap(allTokens, true)
 }
 

@@ -3,7 +3,7 @@ import useActiveWeb3React from '@/src/hooks/useActiveWeb3React'
 import { useTokenBalance, useTokenBalances } from '@/src/hooks/useCurrencyBalance'
 import { useMemo } from 'react'
 
-import { useAllTokens } from '@/src//hooks/useTokenList'
+import { useAllTokens } from '@/src/hooks/useTokenList'
 
 export {
   useCurrencyBalances,

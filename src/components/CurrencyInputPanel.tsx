@@ -49,8 +49,7 @@ export default function CurrencyInputPanel({
   }, [setModalOpen])
 
   return (
-    <div {...rest} className="flex max-w-lg w-full">
-
+    <div {...rest} className="flex w-full lg:w-64 xl:w-full xl:max-w-lg lg:flex-wrap">
       <div
         className="flex-1 cursor-pointer"
         onClick={() => {
@@ -60,17 +59,17 @@ export default function CurrencyInputPanel({
         }}
       >
         <div className="flex p-2 h-10 font-bold">{currency ? currency.name : ''}</div>
-        <div className="flex p-2 items-center w-48">
+        <div className="flex p-2 items-center w-44 lg:w-64 xl:w-44">
           <CurrencyLogo currency={currency} />
-          <div className="text-2xl">{currency ? currency.symbol : <span className="text-sm">Select a token</span>}</div>
+          <div className="text-2xl">{currency ? currency.symbol : <span className="flex text-sm line-height-1">Select a token</span>}</div>
           <ChevronDownIcon width={24} height={24} className="ml-2 stroke-current" />
         </div>
       </div>
       <div className="flex flex-1 flex-col pr-3">
-        <div className="w-1 h-10"> </div>
+        <div className="w-1 h-10 lg:h-0 xl:h-10"> </div>
         {field === Field.INPUT ? (
           <input
-            className="w-40 lg:w-48 h-14 text-xl lg:text-2xl mt-0.5 text-right p-3 bg-amber-50 dark:bg-[#474747]"
+            className="w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl mt-0.5 text-right p-3 bg-amber-50 dark:bg-[#474747]"
             value={value}
             onChange={(event) => {
               enforcer(event.target.value.replace(/,/g, '.'))
@@ -88,7 +87,7 @@ export default function CurrencyInputPanel({
           />
         ) : (
           <div
-            className="flex justify-end items-center w-40 lg:w-48 h-14 text-xl lg:text-2xl text-right p-3 bg-amber-50 dark:bg-[#474747]"
+            className="flex justify-end items-center w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl text-right p-3 bg-amber-50 dark:bg-[#474747]"
           >{value && parseFloat(value) > 0 && currency ? value : null}</div>
         )}
         {account ? (

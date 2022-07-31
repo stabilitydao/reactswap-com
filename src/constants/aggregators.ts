@@ -36,6 +36,9 @@ export const sourceMappingOpenOceanOneInch: {[chainId in ChainId]: {
     UniswapV3: "POLYGON_UNISWAP_V3",
     ClipperRFQ: "POLYGON_ONE_INCH_LIMIT_ORDER_V2",
     KyberSwap: "POLYGON_KYBER_DMM",
+    Dfyn: "DFYN",
+    SushiSwap: "POLYGON_SUSHISWAP",
+    BalancerV2: "POLYGON_BALANCER_V2",
   }
 }
 

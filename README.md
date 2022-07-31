@@ -24,20 +24,22 @@ Decentralized swap at the best price protocol. The best route and rate is calcul
 
 Status: [**live**](https://reactswap.com)
 
-Dev budget: 50k PROFIT [executed proposal](https://www.tally.xyz/governance/eip155:137:0x6214Ba4Ce85C0A6F6025b0d63be7d65214463226/proposal/66682422927270058524602136602710037138274409785058239023318639830806613899674)
-
 
 ### MVP-2: Crypto trading
 
 Decentralized crypto trading and analytics
 
 #### Features
+* :heavy_check_mark: Price charts
+* Account
+* Analytics
+* Trading gauges
 
-* price chart for any pair
-* tokens and DeXs analytics
-* swap to earn NFT
+#### DeFi data providers
+* **DexScreener** [api docs](https://docs.dexscreener.com/)
 
-Status: research
+Status: [**v0 live**](https://reactswap.com)
+
 
 ### MVP-3: Cross-chain swap
 
@@ -48,11 +50,13 @@ Cross-chain swap service.
 
 Status: waiting for second network support
 
-###  MVP-4: Limit orders
+
+### MVP-4: Limit orders
 
 Status: exploring orderbook protocols
 
-###  MVP-5: AMM
+
+### MVP-5: AMM
 
 Next-gen AMM DeX.
 
