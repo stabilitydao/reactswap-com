@@ -140,7 +140,8 @@ export function useCurrencyFromMap(tokens: TokenMap, currencyId?: string | null)
  * Returns undefined if currencyId is invalid or token does not exist.
  */
 export default function useCurrency(currencyId?: string | null): Currency | undefined {
-  const tokens = useTokenMap()
+  // const tokens = useTokenMap()
+  const tokens = useAllTokens()
   return useCurrencyFromMap(tokens, currencyId)
 }
 

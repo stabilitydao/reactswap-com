@@ -155,7 +155,7 @@ const ListRow = memo(function ListRow({ listUrl }: { listUrl: string }) {
       key={listUrl}
       id={listUrlRowHTMLId(listUrl)}
     >
-      <div className={isActive ? "flex w-full p-5 rounded-3xl bg-blue-400 dark:bg-[#9e7a7c]" : "flex w-full p-5 bg-transparent"}>
+      <div className={isActive ? "flex items-center w-full p-5 rounded-3xl bg-blue-400 dark:bg-[#9e7a7c]" : "flex w-full p-5 bg-transparent"}>
       {list.logoURI ? (
         <ListLogo style={{ width: 40, height: 40, marginRight: '1rem' }} logoURI={list.logoURI} alt={`${list.name} list logo`} />
       ) : (

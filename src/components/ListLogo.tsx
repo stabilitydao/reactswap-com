@@ -15,5 +15,5 @@ export default function ListLogo({
 }) {
   const srcs: string[] = uriToHttp(logoURI)
 
-  return <img alt={alt} className="w-10 h-20" src={srcs[0]} style={style} />
+  return <img alt={alt} className="w-10 h-20 rounded-full" src={srcs[0]} style={style} />
 }
