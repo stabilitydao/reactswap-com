@@ -33,6 +33,7 @@ import { currencyAddress } from '@/src/utils/currencyAddress'
 import DexScreenerChart from '@/components/DexScreenerChart'
 import ConnectWallet from '@/components/ConnectWallet'
 import { ChainId } from '@/src/enums/ChainId'
+import {Contract, ContractTransaction} from "ethers";
 
 function Swap() {
   // console.log('Swap render')
@@ -63,7 +64,8 @@ function Swap() {
   const [oneInchSources, setOneInchSources] = useState<{[id:string]:OneInchLiquiditySource}>({})
   const [chartPairAddress, setChartPairAddress] = useState<string|undefined>()
   const [pairs, setPairs] = useState<{[id:string]:Pair}>({})
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(0)
+  const [manualSelectedAgg, setManualSelectedAgg] = useState<string|undefined>()
 
   // console.debug('inputCurrency:', inputCurrency?.symbol)
   // console.debug('outputCurrency:', outputCurrency?.symbol)
@@ -87,9 +89,9 @@ function Swap() {
     let isSubscribed = true
     const loadTokensData = async () => {
       if (inputTokenAddress && outputTokenAddress) {
-        const inputPairs = await dexScreener.getTokens([inputTokenAddress])
+        const inputPairs = await dexScreener.tokens([inputTokenAddress])
         // console.log(a)
-        const outputPairs = await dexScreener.getTokens([outputTokenAddress])
+        const outputPairs = await dexScreener.tokens([outputTokenAddress])
         const foundPairs:{[id:string]:Pair} = {};
 
         [...inputPairs?.pairs || [], ...outputPairs?.pairs || []]
@@ -179,21 +181,26 @@ function Swap() {
   // calculate best swap quote
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
     let bestQuote: SwapQuote|undefined
-    Object.keys(quotes).forEach(aggId => {
-      const q = quotes[aggId]
-      if (
-        q && q.outputAmountFixed && parseFloat(q.outputAmountFixed) > 0
-        && (
-          !bestQuote
-        || (bestQuote.outputAmountFixed && parseFloat(q.outputAmountFixed) > parseFloat(bestQuote.outputAmountFixed))
-        )
-      ) {
-        bestQuote = q
-      }
-    })
+    if (manualSelectedAgg) {
+      bestQuote = quotes[manualSelectedAgg]
+    } else {
+      Object.keys(quotes).forEach(aggId => {
+        const q = quotes[aggId]
+        if (
+            q && q.outputAmountFixed && parseFloat(q.outputAmountFixed) > 0
+            && (
+                !bestQuote
+                || (bestQuote.outputAmountFixed && parseFloat(q.outputAmountFixed) > parseFloat(bestQuote.outputAmountFixed))
+            )
+        ) {
+          bestQuote = q
+        }
+      })
+    }
     return bestQuote
   }, [
-    JSON.stringify(quotes)
+      JSON.stringify(quotes),
+      manualSelectedAgg
   ])
   // console.log('Quotes:', quotes)
   // console.log('BestQuote:', bestQuote)
@@ -391,7 +398,7 @@ function Swap() {
     bestQuote
   ])
 
-  const metarouterContract = useMetaRouterContract()
+  const metarouterContract: Contract|null = useMetaRouterContract()
 
   const handleSwap = useCallback(async () => {
     // console.log('handle Swap')
@@ -414,7 +421,7 @@ function Swap() {
         {
           value: txData.value,
         }
-      ).then((response) => {
+      ).then((response: ContractTransaction) => {
         setPendingSwap(true)
 
         response.wait(1).then(() => {
@@ -424,7 +431,7 @@ function Swap() {
           setPendingSwap(false)
           toast.error('Swap failed')
         })
-      }).catch((error) => {
+      }).catch((error: any) => {
         setPendingSwap(false)
         console.error(`Swap failed`, error)
         toast.error('Swap failed')
@@ -550,14 +557,20 @@ function Swap() {
           {Object.keys(quotes).length > 0 &&
             <div className="flex w-full max-w-sm lg:w-72 lg:max-w-md xl:w-full flex-col bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
               <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
-              {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
-                const isBest = Object.keys(quotes).length > 1 && index == 0
+              {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map(aggId => {
+                const isSelected = bestQuote?.protocolId == aggId
 
                 return (
-                  <div key={aggId} className="flex pl-2 py-2 items-center w-full">
+                  <div key={aggId} className="flex pl-2 py-2 items-center w-full" onClick={() => {
+                    if (manualSelectedAgg && isSelected) {
+                      setManualSelectedAgg(undefined)
+                    } else {
+                      setManualSelectedAgg(aggId)
+                    }
+                  }}>
                     <img src={aggregators[chainId][aggId].logoURI} className="w-8 h-8" alt={aggId} title={aggId} />
                     <div className="text-lg pl-4">
-                      {isBest ? (
+                      {isSelected ? (
                         <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
                       ) : quotes[aggId]?.outputAmountFixed}
                       {quotes[aggId]?.error && (
@@ -567,7 +580,7 @@ function Swap() {
                   </div>
                 )
               } )}
-              <div className="mt-4 flex text-sm pl-2 md:mb-2">Best routing</div>
+              <div className="mt-4 flex text-sm pl-2 md:mb-2">{manualSelectedAgg ? 'Routing' : 'Best routing'}</div>
               <div>
                 {bestQuote &&
                   <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
