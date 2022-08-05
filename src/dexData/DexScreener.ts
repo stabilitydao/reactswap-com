@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, {AxiosResponse} from 'axios'
 import { ChainId } from '@/src/enums/ChainId'
 
 export const chainIdMapping: {[chainId in ChainId]: string} = {
@@ -72,20 +72,38 @@ interface TokensResponse {
 }
 
 export class DexScreener {
-  apiEndpoint: string = 'https://api.dexscreener.io/latest/dex/'
+  apiEndpoint = 'https://api.dexscreener.io/latest/dex/'
 
-  async getTokens(tokens: string[]): Promise<TokensResponse|undefined> {
-    const url = `${this.apiEndpoint}tokens/${tokens.join(',')}`
+  async tokens(tokenAddresses: string[]): Promise<TokensResponse|undefined> {
+    const url = `${this.apiEndpoint}tokens/${tokenAddresses.join(',')}`
     try {
-      const { data }: any = await axios({
+      const { data }: AxiosResponse = await axios({
         url,
       })
 
-      console.log(`DexScreener quote reply raw data:`, data)
+      console.log(`DexScreener tokens reply raw data:`, data)
 
       return data
-    }  catch (error: any) {
-      console.log('Catched error: ', error)
+    }  catch (error) {
+      console.log('Caught error: ', error)
+    }
+
+    return undefined
+  }
+
+  // query E.g.: WBTC or WBTC/USDC or 0xAbc01
+  async search(query: string): Promise<PairsResponse|undefined> {
+    const url = `${this.apiEndpoint}search/?q=${query}`
+    try {
+      const { data }: AxiosResponse = await axios({
+        url,
+      })
+
+      console.log(`DexScreener search reply raw data:`, data)
+
+      return data
+    }  catch (error) {
+      console.log('Caught error: ', error)
     }
 
     return undefined
