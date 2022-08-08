@@ -34,6 +34,9 @@ import DexScreenerChart from '@/components/DexScreenerChart'
 import ConnectWallet from '@/components/ConnectWallet'
 import { ChainId } from '@/src/enums/ChainId'
 import {Contract, ContractTransaction} from "ethers";
+import {fee} from "@/src/constants/fees";
+import {calcOutputExactMin} from "@/src/utils";
+import {MdExpandLess, MdExpandMore} from "react-icons/md";
 
 function Swap() {
   // console.log('Swap render')
@@ -66,6 +69,7 @@ function Swap() {
   const [pairs, setPairs] = useState<{[id:string]:Pair}>({})
   const [seconds, setSeconds] = useState(0)
   const [manualSelectedAgg, setManualSelectedAgg] = useState<string|undefined>()
+  const [showRouting, setShowRouting] = useState<boolean>(false)
 
   // console.debug('inputCurrency:', inputCurrency?.symbol)
   // console.debug('outputCurrency:', outputCurrency?.symbol)
@@ -92,10 +96,13 @@ function Swap() {
         const inputPairs = await dexScreener.tokens([inputTokenAddress])
         // console.log(a)
         const outputPairs = await dexScreener.tokens([outputTokenAddress])
+        const searchPairs = await dexScreener.search(`${inputTokenAddress} ${outputTokenAddress}`)
+
         const foundPairs:{[id:string]:Pair} = {};
 
-        [...inputPairs?.pairs || [], ...outputPairs?.pairs || []]
+        [...inputPairs?.pairs || [], ...outputPairs?.pairs || [], ...searchPairs?.pairs || [],]
           .filter(pair => pair.chainId == chainIdMapping[ChainId.POLYGON])
+            .sort((a, b) => a?.liquidity?.usd && b?.liquidity?.usd ?  a?.liquidity?.usd - b?.liquidity?.usd : 0)
           .forEach(pair => {
             foundPairs[pair.pairAddress] = pair
         })
@@ -113,7 +120,9 @@ function Swap() {
     let isSubscribed = true
     if (!chartPairAddress || !Object.keys(pairs).includes(chartPairAddress)) {
       let bestPair
-      Object.keys(pairs).forEach(pairAddr => {
+
+      Object.keys(pairs)
+          .forEach(pairAddr => {
         const pair = pairs[pairAddr]
         if (
           (
@@ -479,7 +488,7 @@ function Swap() {
               onMax={handleMaxInput}
             />
           </div>
-          <div className="h-20 flex justify-center items-center">
+          <div className="h-10 flex justify-center items-center">
             <div title="Switch tokens">
               <HiSwitchVertical
                 className="cursor-pointer"
@@ -503,34 +512,46 @@ function Swap() {
             />
           </div>
 
-          <div className="flex mt-10 mb-10 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+          <div className="flex h-48 mt-5 mb-5 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+            <div className="flex h-10">
+              {bestQuote && bestQuote.outputAmountFixed && inputValue && chartPairAddress && pairs[chartPairAddress] &&
+                  <div className="flex items-start flex-col">
+                    <div className="text-xs">
+                      1 {inputCurrency?.symbol} = {Math.round(1000000*parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 1000000} {outputCurrency?.symbol} = $ {inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? pairs[chartPairAddress].priceUsd : Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 100}
+                    </div>
+                    <div className="text-xs">
+                      1 {outputCurrency?.symbol} = {Math.round(1000000*parseFloat(inputValue) / parseFloat(bestQuote.outputAmountFixed))/ 1000000} {inputCurrency?.symbol} = $ {inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * inputValue / parseFloat(bestQuote.outputAmountFixed))/ 100 : pairs[chartPairAddress].priceUsd}
+                    </div>
+                  </div>
+              }
+            </div>
+            <div className="flex h-10">
+              {bestQuote?.outputAmount && outputCurrency &&
+                  <div className="text-xs">Output exact minimum (quote - {slippageInput}% - {fee}%) = {calcOutputExactMin(CurrencyAmount.fromRawAmount(outputCurrency, JSBI.BigInt(bestQuote.outputAmount)), slippageInput)}</div>
+              }
+            </div>
+            {1 &&
+                <div className="flex justify-start mb-4 items-center">
+                  <div className="flex w-auto justify-end mr-5">max slippage</div>
+                  <div>
+                    <input
+                        style={{
+                          border: slippageError ? '2px solid red' : '2px solid transparent',
+                          backgroundColor: slippageError ? '#ff0000' : '',
+                        }}
+                        onChange={(e) => handleChangeSlippageInput(e.target.value)}
+                        className="w-12 py-1 px-2 text-right"
+                        value={slippageInput}
+                    /> %
+                  </div>
+                </div>
+            }
+
             {!inputValue && account &&
               <div className="w-full">
                 Enter amount
               </div>
             }
-            {!account &&
-              <div className="w-full">
-                <ConnectWallet />
-              </div>
-            }
-            {canSwap &&
-              <div className="flex justify-start mb-4 items-center">
-                <div className="flex w-auto justify-end mr-5">max slippage</div>
-                <div>
-                  <input
-                    style={{
-                      border: slippageError ? '2px solid red' : '2px solid transparent',
-                      backgroundColor: slippageError ? '#ff0000' : '',
-                    }}
-                    onChange={(e) => handleChangeSlippageInput(e.target.value)}
-                    className="w-12 py-1 px-2 text-right"
-                    value={slippageInput}
-                  /> %
-                </div>
-              </div>
-            }
-
             {insufficientBalance && !pendingSwap && (
               <div className="dark:text-red-200 text-xl font-bold py-1 px-4 dark:bg-red-800 w-full">Insuffucient balance</div>
             )}
@@ -543,6 +564,11 @@ function Swap() {
                 <Loader stroke="#ffffff"/>
               </div>
             )}
+            {!account &&
+                <div className="w-full">
+                  <ConnectWallet />
+                </div>
+            }
             {canSwap && !pendingSwap && (
               <button className="w-full bg-green-600 text-white shadow-2xl shadow-green-900 dark:bg-green-700 text-xl font-bold h-10 px-5" onClick={handleSwap}>Swap</button>          )}
             {pendingSwap && (
@@ -555,36 +581,70 @@ function Swap() {
         </div>
         <div className="flex w-full max-w-md flex-col lg:max-w-md lg:w-full xl:w-full xl:max-w-md mt-0 items-center">
           {Object.keys(quotes).length > 0 &&
-            <div className="flex w-full max-w-sm lg:w-72 lg:max-w-md xl:w-full flex-col bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-              <div className="flex text-sm pl-2 mb-2 md:mb-1">Quotes</div>
-              {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map(aggId => {
-                const isSelected = bestQuote?.protocolId == aggId
+            <div className="flex w-full max-w-sm lg:w-72 lg:max-w-md xl:w-full flex-col bg-[#fff3db] dark:bg-[#2d2d2d]  rounded-2xl border-2 border-transparent shadow-2xl dark:shadow-none dark:shadow-lg">
+              <div className="flex h-10 justify-start px-4 items-center cursor-pointer relative"  onClick={() => {
+                setShowRouting(!showRouting)
+              }}>
+                <div className="flex w-20 text-md">Routing</div>
+                <div className="w-20">{manualSelectedAgg ? (
+                    <div className="text-orange-700 dark:text-orange-200 font-bold border-2 border-orange-700 dark:border-orange-200 px-2 rounded-lg">manual</div>
+                ) : (
+                    <div className="h-6 text-sm text-green-700 dark:text-green-200 font-bold border-2 border-green-700 dark:border-green-200 px-2 rounded-lg">auto</div>
+                )}</div>
+                <div className="w-32 md:w-48 flex items-center ml-5 flex-none overflow-hidden">
+                  {bestQuote &&
+                      <img src={aggregators[chainId][bestQuote.protocolId].logoURI} className="w-8 h-8" alt={bestQuote.protocolId}
+                           title={bestQuote.protocolId}/>
+                  }
+                  {bestQuote &&
+                      <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} showDexOnly={true} />
+                  }
+                </div>
+                <div className="absolute right-0 pr-2">
+                  <span>{showRouting ? (
+                      <MdExpandMore />
+                  ) : (
+                      <MdExpandLess />
+                  )}</span>
+                </div>
+              </div>
 
-                return (
-                  <div key={aggId} className="flex pl-2 py-2 items-center w-full" onClick={() => {
-                    if (manualSelectedAgg && isSelected) {
-                      setManualSelectedAgg(undefined)
-                    } else {
-                      setManualSelectedAgg(aggId)
-                    }
-                  }}>
-                    <img src={aggregators[chainId][aggId].logoURI} className="w-8 h-8" alt={aggId} title={aggId} />
-                    <div className="text-lg pl-4">
-                      {isSelected ? (
-                        <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
-                      ) : quotes[aggId]?.outputAmountFixed}
-                      {quotes[aggId]?.error && (
-                        <span className="text-sm text-left">{quotes[aggId]?.error}</span>
-                      )}
-                    </div>
-                  </div>
-                )
-              } )}
-              <div className="mt-4 flex text-sm pl-2 md:mb-2">{manualSelectedAgg ? 'Routing' : 'Best routing'}</div>
-              <div>
-                {bestQuote &&
-                  <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
-                }
+              <div style={{
+                maxHeight: showRouting ? 1000 : 0,
+                overflow: 'hidden',
+              }}>
+                <div className="flex text-sm pl-4 mb-2 md:mb-1 mt-3">Quotes</div>
+                {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
+                  const isSelected = manualSelectedAgg == aggId
+                  const isBestQuote = index == 0
+
+                  return (
+                      <div key={aggId} className={isSelected ? "flex pl-2 py-2 items-center w-full border-2 dark:border-orange-200 rounded-xl cursor-pointer" : "flex pl-2 py-2 items-center w-full cursor-pointer border-2 border-transparent"} onClick={() => {
+                        if (manualSelectedAgg && isSelected) {
+                          setManualSelectedAgg(undefined)
+                        } else {
+                          setManualSelectedAgg(aggId)
+                        }
+                      }}
+                      >
+                        <img src={aggregators[chainId][aggId].logoURI} className="w-8 h-8" alt={aggId} title={aggId} />
+                        <div className="text-lg pl-4">
+                          {isBestQuote ? (
+                              <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
+                          ) : quotes[aggId]?.outputAmountFixed}
+                          {quotes[aggId]?.error && (
+                              <span className="text-sm text-left">{quotes[aggId]?.error}</span>
+                          )}
+                        </div>
+                      </div>
+                  )
+                } )}
+                <div className="mt-4 flex text-sm pl-4 md:mb-2">Route</div>
+                <div>
+                  {bestQuote &&
+                      <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
+                  }
+                </div>
               </div>
             </div>
           }

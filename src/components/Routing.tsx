@@ -17,13 +17,72 @@ interface SwapRoutingProps {
     [id:string]: OneInchLiquiditySource
   }
   chainId: ChainId
+  showDexOnly?: boolean
 }
 
-function Routing({bestQuote, inchSources, chainId}: SwapRoutingProps) {
+function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRoutingProps) {
   // console.log(`Routing bestQuote sources ${bestQuote.protocolId}`, bestQuote.sources)
   const aggId = bestQuote.protocolId
 
   const allTokens: { [address: string]: Token|WrappedTokenInfo } = useAllTokens()
+
+  if (showDexOnly) {
+    const dexList: { [id: string]: { img: string, name: string, } } = {}
+    if (aggId === AggregatorId.OpenOcean) {
+      bestQuote.sources.routes[0].subRoutes.forEach((r: OpenOceanSubRoute) => {
+        Object.keys(r.dexes).forEach((i: string, index: number) => {
+          const dex = r.dexes[index]
+          const inchSource: OneInchLiquiditySource | undefined = sourceMappingOpenOceanOneInch[chainId][dex.dex] ? inchSources[sourceMappingOpenOceanOneInch[chainId][dex.dex]] : undefined
+          if (inchSource && !dexList[inchSource.title]) {
+            dexList[inchSource.title] = {
+              img: inchSource.img_color,
+              name: inchSource.title,
+            }
+          }
+        })
+      })
+    } else if (aggId === AggregatorId.OneInch) {
+      Object.keys(bestQuote.sources).forEach((i) => {
+        const routeBlock = bestQuote.sources[i]
+        routeBlock.forEach((tokenToRoute: OneInchLuqidityPoolRoute[]) => {
+          tokenToRoute.forEach((liquidityPoolRoute: OneInchLuqidityPoolRoute) => {
+            if (inchSources[liquidityPoolRoute.name]) {
+              const inchSource = inchSources[liquidityPoolRoute.name]
+              if (inchSource && !dexList[inchSource.title]) {
+                dexList[inchSource.title] = {
+                  img: inchSource.img_color,
+                  name: inchSource.title,
+                }
+              }
+            }
+          })
+        })
+      })
+    } else if (aggId === AggregatorId.ZeroX) {
+      Object.keys(bestQuote.sources).forEach((i) => {
+        const order = bestQuote.sources[i]
+        const inchSource: OneInchLiquiditySource | undefined = sourceMappingZeroXOneInch[chainId][order.source] ? inchSources[sourceMappingZeroXOneInch[chainId][order.source]] : undefined
+        if (inchSource && !dexList[inchSource.title]) {
+          dexList[inchSource.title] = {
+            img: inchSource.img_color,
+            name: inchSource.title,
+          }
+        }
+      })
+    }
+
+    // console.log('dexlist:', dexList)
+
+    return (
+        <div className="flex lg:hidden xl:flex">
+          {Object.keys(dexList).map(name => {
+            return (
+                <img className="w-6 h-6 mx-1" key={name} src={dexList[name].img} alt={name}/>
+            )
+          })}
+        </div>
+    )
+  }
 
   return (
     <>

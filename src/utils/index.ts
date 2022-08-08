@@ -82,6 +82,7 @@ import { toChecksumAddress } from '@walletconnect/utils'
 import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
 import { wrappedNative } from '@/src/constants/currencies'
 import { ChainId } from '@/src/enums/ChainId'
+import {fee} from "@/src/constants/fees";
 
 /**
  * Parses a CurrencyAmount from the passed string.
@@ -104,4 +105,9 @@ export default function tryParseCurrencyAmount<T extends Currency>(
     console.debug(`Failed to parse input amount: "${value}"`, error)
   }
   return undefined
+}
+
+export function calcOutputExactMin(quote: CurrencyAmount<Currency>, slippage: string) : string {
+  const withSLippage = quote.subtract(quote.multiply(JSBI.BigInt(parseFloat(slippage)*1000)).divide(JSBI.BigInt(100000)));
+  return withSLippage.subtract(withSLippage.multiply(JSBI.BigInt(parseFloat(fee)*1000)).divide(JSBI.BigInt(100000))).toFixed(quote.currency.decimals >= 8 ? 8 : undefined)
 }

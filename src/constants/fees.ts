@@ -1,1 +1,1 @@
-export const fee = '0.5'
+export const fee = '0.2'
