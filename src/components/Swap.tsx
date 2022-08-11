@@ -147,7 +147,7 @@ function Swap() {
       }
     }
     return () => {isSubscribed = false}
-  }, [JSON.stringify(pairs)])
+  }, [JSON.stringify(pairs), inputTokenAddress, outputTokenAddress])
 
 
   // Quoting DeX aggregators for swap quotes
@@ -513,21 +513,21 @@ function Swap() {
           </div>
 
           <div className="flex h-48 mt-5 mb-5 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-            <div className="flex h-10">
+            <div className="flex h-10 dark:text-[#e1e1cd] font-bold">
               {bestQuote && bestQuote.outputAmountFixed && inputValue && chartPairAddress && pairs[chartPairAddress] &&
                   <div className="flex items-start flex-col">
                     <div className="text-xs">
-                      1 {inputCurrency?.symbol} = {Math.round(1000000*parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 1000000} {outputCurrency?.symbol} = $ {inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? pairs[chartPairAddress].priceUsd : Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 100}
+                      1 {inputCurrency?.symbol} = {Math.round(1000000*parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 1000000} {outputCurrency?.symbol} = ${inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? pairs[chartPairAddress].priceUsd : Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 100}
                     </div>
                     <div className="text-xs">
-                      1 {outputCurrency?.symbol} = {Math.round(1000000*parseFloat(inputValue) / parseFloat(bestQuote.outputAmountFixed))/ 1000000} {inputCurrency?.symbol} = $ {inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * inputValue / parseFloat(bestQuote.outputAmountFixed))/ 100 : pairs[chartPairAddress].priceUsd}
+                      1 {outputCurrency?.symbol} = {Math.round(1000000*parseFloat(inputValue) / parseFloat(bestQuote.outputAmountFixed))/ 1000000} {inputCurrency?.symbol} = ${inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * inputValue / parseFloat(bestQuote.outputAmountFixed))/ 100 : pairs[chartPairAddress].priceUsd}
                     </div>
                   </div>
               }
             </div>
-            <div className="flex h-10">
+            <div className="flex h-10 justify-start text-left dark:text-[#e1e1cd] font-bold">
               {bestQuote?.outputAmount && outputCurrency &&
-                  <div className="text-xs">Output exact minimum (quote - {slippageInput}% - {fee}%) = {calcOutputExactMin(CurrencyAmount.fromRawAmount(outputCurrency, JSBI.BigInt(bestQuote.outputAmount)), slippageInput)}</div>
+                  <div className="text-xs">Output exact minimum (quote - {slippageInput}% - {fee}%) = {calcOutputExactMin(CurrencyAmount.fromRawAmount(outputCurrency, JSBI.BigInt(bestQuote.outputAmount)), slippageInput)} {outputCurrency.symbol}</div>
               }
             </div>
             {1 &&
@@ -537,7 +537,7 @@ function Swap() {
                     <input
                         style={{
                           border: slippageError ? '2px solid red' : '2px solid transparent',
-                          backgroundColor: slippageError ? '#ff0000' : '',
+                          backgroundColor: slippageError ? '#ff0000' : 'transparent',
                         }}
                         onChange={(e) => handleChangeSlippageInput(e.target.value)}
                         className="w-12 py-1 px-2 text-right"
@@ -591,7 +591,7 @@ function Swap() {
                 ) : (
                     <div className="h-6 text-sm text-green-700 dark:text-green-200 font-bold border-2 border-green-700 dark:border-green-200 px-2 rounded-lg">auto</div>
                 )}</div>
-                <div className="w-32 md:w-48 flex items-center ml-5 flex-none overflow-hidden">
+                <div className="w-32 md:w-48 lg:w-16 xl:w-48 flex items-center ml-5 flex-none overflow-hidden">
                   {bestQuote &&
                       <img src={aggregators[chainId][bestQuote.protocolId].logoURI} className="w-8 h-8" alt={bestQuote.protocolId}
                            title={bestQuote.protocolId}/>
@@ -670,14 +670,12 @@ function Swap() {
                     <option
                       value={pairAddr}
                       key={pairAddr}
+                      className="flex gap-4 w-full"
                     >
-                      <div className="flex gap-4 w-full">
-                        {pair.baseToken.symbol}/{pair.quoteToken.symbol} on {pair.dexId}
-                        {` ${pairAddr.substring(0, 3 + 2)}...${pairAddr.substring(pairAddr.length - 3)} `}
-                        Liquidity: ${pair.liquidity?.usd},
-                        Volume 24h: ${pair.volume.h24}
-                      </div>
-
+                      {pair.baseToken.symbol}/{pair.quoteToken.symbol} on {pair.dexId}
+                      {` ${pairAddr.substring(0, 3 + 2)}...${pairAddr.substring(pairAddr.length - 3)} `}
+                      Liquidity: ${pair.liquidity?.usd},
+                      Volume 24h: ${pair.volume.h24}
                     </option>
                   )
                 })}

@@ -37,7 +37,7 @@ export default function Web3Status() {
           </Modal>
         </>
       ) : (
-        <ConnectWallet />
+        <ConnectWallet smCollapse={true} />
       )}
     </>
   )

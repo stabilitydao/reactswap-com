@@ -4,7 +4,7 @@ import { injected } from '@/src/connectors'
 import { BiWallet } from 'react-icons/bi'
 import Modal from '@/components/Modal'
 
-export default function ConnectWallet() {
+export default function ConnectWallet({smCollapse = false} : {smCollapse?: boolean}) {
   const { activate, account } = useWeb3React()
   const [modalOpened, setModalOpened] = useState<boolean>(false)
 
@@ -26,7 +26,15 @@ export default function ConnectWallet() {
     <>
       {!account &&
         <button className="flex w-full items-center dark:bg-green-800 px-5 h-10 rounded-2xl justify-center" onClick={toggleWalletModal}>
-          <BiWallet className="text-xl md:hidden" /> <span className="hidden md:flex">Connect wallet</span>
+          {smCollapse ? (
+              <>
+                <BiWallet className="text-xl md:hidden" /> <span className="hidden md:flex">Connect wallet</span>
+              </>
+          ) : (
+            <>
+              <span>Connect wallet</span>
+            </>
+            )}
         </button>
       }
       <Modal isOpen={modalOpened} onDismiss={toggleWalletModal} maxHeight={80} minHeight={20}>

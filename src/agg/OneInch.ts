@@ -81,17 +81,21 @@ export class OneInch implements SwapAggregator {
       }
     } catch (error: any) {
       if (error.request && error.request.response) {
-        const parsedResponse = JSON.parse(error.request.response)
-        if (parsedResponse && parsedResponse.statusCode == 400 && parsedResponse.description) {
-          // console.log('1Inch quote error 400:', parsedResponse.description)
-          return {
-            chainId: this.chainId,
-            protocolId: this.id,
-            inputAmount: amount.quotient.toString(),
-            inputCurrencyId: params.fromTokenAddress,
-            outputCurrencyId: params.toTokenAddress,
-            error: parsedResponse.description
+        try {
+          const parsedResponse = JSON.parse(error.request.response)
+          if (parsedResponse && parsedResponse.statusCode == 400 && parsedResponse.description) {
+            // console.log('1Inch quote error 400:', parsedResponse.description)
+            return {
+              chainId: this.chainId,
+              protocolId: this.id,
+              inputAmount: amount.quotient.toString(),
+              inputCurrencyId: params.fromTokenAddress,
+              outputCurrencyId: params.toTokenAddress,
+              error: parsedResponse.description
+            }
           }
+        } catch (e) {
+          console.error('cant parse json')
         }
       }
       // console.log(error.request.response)
