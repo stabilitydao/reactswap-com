@@ -19,6 +19,10 @@ const ContentWrapper = styled.div`
   @media (max-width: 1280px) {
     max-width: 1200px;
   }
+
+  @media (max-width: 1200px) {
+    max-width: 100%;
+  }
 `
 
 function DexScreenerChart({pairAddress}: {pairAddress: string}) {
