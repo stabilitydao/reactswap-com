@@ -12,7 +12,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
         </Head>
-        <div className="relative from-green-50 to-orange-200 bg-gradient-to-tr dark:from-[#454344] dark:to-[#543a3b] font-Roboto dark:text-white dark:bg-teal-900 h-full pb-20 w-screen">
+        <div className="relative from-green-50 to-orange-200 bg-gradient-to-tr dark:from-[#454344] dark:to-[#543a3b] font-Roboto dark:text-white dark:bg-teal-900 h-full pb-20 w-screen pr-5">
           <Navbar />
           {children}
           <div className="flex absolute left-0 bottom-0 w-full h-20 dark:bg-[#302b2b]">

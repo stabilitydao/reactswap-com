@@ -69,7 +69,7 @@ export default function CurrencyInputPanel({
         <div className="w-1 h-10 lg:h-0 xl:h-10"> </div>
         {field === Field.INPUT ? (
           <input
-            className="w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl mt-0.5 text-right p-3 bg-amber-50 dark:bg-[#474747]"
+            className="w-full md:w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl mt-0.5 text-right p-3 bg-amber-50 dark:bg-[#474747] rounded-xl"
             value={value}
             onChange={(event) => {
               enforcer(event.target.value.replace(/,/g, '.'))
@@ -87,7 +87,7 @@ export default function CurrencyInputPanel({
           />
         ) : (
           <div
-            className="flex justify-end items-center w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl text-right p-3 bg-amber-50 dark:bg-[#474747]"
+            className="flex justify-end items-center w-full md:w-40 lg:w-full xl:w-48 h-14 text-xl lg:text-2xl text-right p-3 bg-amber-50 dark:bg-transparent cursor-default dark:border-2 dark:border-[#616161] rounded-xl"
           >{value && parseFloat(value) > 0 && currency ? value : null}</div>
         )}
         {account ? (

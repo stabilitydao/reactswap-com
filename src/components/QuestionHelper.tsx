@@ -7,15 +7,15 @@ const QuestionWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0px;
-  width: 18px;
-  height: 18px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
   border: none;
   background: none;
   outline: none;
   cursor: default;
   border-radius: 36px;
-  font-size: 12px;
+  font-size: 10px;
   background-color: ${({ theme }) => theme.bg2};
   color: ${({ theme }) => theme.text2};
 
@@ -36,7 +36,7 @@ export default function QuestionHelper({ text }: { text: ReactNode; size?: numbe
   const close = useCallback(() => setShow(false), [setShow])
 
   return (
-    <span style={{ marginLeft: 4, display: 'flex', alignItems: 'center' }}>
+    <span style={{ marginLeft: 4, display: 'inline-flex', alignItems: 'center' }}>
       <Tooltip text={text} show={show}>
         <QuestionWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
           <QuestionMark>?</QuestionMark>

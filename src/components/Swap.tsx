@@ -8,7 +8,7 @@ import {
   useSwapState,
 } from '@/src/state/swap/hooks'
 import { useChainId } from '@/src/state/network/hooks'
-import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { Field } from '@/src/state/swap/actions'
 import CurrencyInputPanel from '@/components/CurrencyInputPanel'
 import { AggregatorId } from '@/src/enums/AggregatorId'
@@ -37,6 +37,7 @@ import {Contract, ContractTransaction} from "ethers";
 import {fee} from "@/src/constants/fees";
 import {calcOutputExactMin} from "@/src/utils";
 import {MdExpandLess, MdExpandMore} from "react-icons/md";
+import QuestionHelper from "@/components/QuestionHelper";
 
 function Swap() {
   // console.log('Swap render')
@@ -475,8 +476,8 @@ function Swap() {
   return (
     <div className="flex w-full mt-5 md:mt-0 mb-10 flex-wrap lg:flex-nowrap justify-center gap-5" style={{maxWidth: 1500}}>
       <div className="flex w-full flex-col md:flex-row lg:w-72 xl:w-full xl:max-w-md lg:flex-col items-center md:items-start mb-10 lg:justify-start">
-        <div className="flex w-full max-w-md flex-col items-center">
-          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+        <div className="flex w-full md:max-w-md flex-col items-center">
+          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 px-1 md:px-3 shadow-2xl dark:shadow-none dark:shadow-lg">
             <div className="flex text-sm pl-2">You sell</div>
             <CurrencyInputPanel
               field={Field.INPUT}
@@ -501,7 +502,7 @@ function Swap() {
               />
             </div>
           </div>
-          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
+          <div className="flex flex-col w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md bg-[#fff3db] dark:bg-[#2d2d2d] pb-5 rounded-2xl border-2 border-transparent p-3 px-1 md:px-3 shadow-2xl dark:shadow-none dark:shadow-lg">
             <div className="flex text-sm pl-2">You buy</div>
             <CurrencyInputPanel
               field={Field.OUTPUT}
@@ -513,7 +514,7 @@ function Swap() {
           </div>
 
           <div className="flex h-48 mt-5 mb-5 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
-            <div className="flex h-10 dark:text-[#e1e1cd] font-bold">
+            <div className="flex dark:text-[#e1e1cd] font-bold">
               {bestQuote && bestQuote.outputAmountFixed && inputValue && chartPairAddress && pairs[chartPairAddress] &&
                   <div className="flex items-start flex-col">
                     <div className="text-xs">
@@ -525,13 +526,22 @@ function Swap() {
                   </div>
               }
             </div>
-            <div className="flex h-10 justify-start text-left dark:text-[#e1e1cd] font-bold">
+            <div className="flex h-7 justify-start text-left dark:text-[#e1e1cd] font-bold">
               {bestQuote?.outputAmount && outputCurrency &&
-                  <div className="text-xs">Output exact minimum (quote - {slippageInput}% - {fee}%) = {calcOutputExactMin(CurrencyAmount.fromRawAmount(outputCurrency, JSBI.BigInt(bestQuote.outputAmount)), slippageInput)} {outputCurrency.symbol}</div>
+                  <div className="text-xs">Output exact minimum
+                    <QuestionHelper
+                        text={
+                          <span>
+                quote - {slippageInput}% slippage - {fee}% fee
+              </span>
+                        }
+                    />
+                    <span className="mr-2" />
+                    {calcOutputExactMin(CurrencyAmount.fromRawAmount(outputCurrency, JSBI.BigInt(bestQuote.outputAmount)), slippageInput)} {outputCurrency.symbol}</div>
               }
             </div>
             {1 &&
-                <div className="flex justify-start mb-4 items-center">
+                <div className="flex justify-start mb-5 pt-3 items-center">
                   <div className="flex w-auto justify-end mr-5">max slippage</div>
                   <div>
                     <input
@@ -582,7 +592,7 @@ function Swap() {
         <div className="flex w-full max-w-md flex-col lg:max-w-md lg:w-full xl:w-full xl:max-w-md mt-0 items-center">
           {Object.keys(quotes).length > 0 &&
             <div className="flex w-full max-w-sm lg:w-72 lg:max-w-md xl:w-full flex-col bg-[#fff3db] dark:bg-[#2d2d2d]  rounded-2xl border-2 border-transparent shadow-2xl dark:shadow-none dark:shadow-lg">
-              <div className="flex h-10 justify-start px-4 items-center cursor-pointer relative"  onClick={() => {
+              <div className="flex h-12 justify-start px-4 items-center cursor-pointer relative"  onClick={() => {
                 setShowRouting(!showRouting)
               }}>
                 <div className="flex w-20 text-md">Routing</div>
