@@ -29,9 +29,9 @@ export default function Web3Status() {
           <Modal isOpen={modalOpened} onDismiss={toggleAccountModal} maxHeight={80} minHeight={20}>
             <div className="flex flex-col w-full">
               <div className="flex justify-center text-lg text-center w-full py-3">Account</div>
-              <div className="flex w-full items-center justify-center flex-col">
-                <div>{account}</div>
-                <button className="flex btn bg-amber-800 px-5" onClick={disconnect}>Disconnect wallet</button>
+              <div className="flex w-full items-center justify-center flex-col px-5">
+                <div className="text-xs mb-5">{account}</div>
+                <button className="flex w-full btn bg-amber-900 hover:bg-amber-800 px-5 justify-center h-10 items-center font-bold text-lg rounded-xl" onClick={disconnect}>Disconnect wallet</button>
               </div>
             </div>
           </Modal>
