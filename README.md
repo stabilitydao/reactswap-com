@@ -8,37 +8,38 @@ Repo contains [reactswap.com](https://reactswap.com) dApp source code.
 ## Roadmap
 
 ### Networks
-* [live] Polygon
+* Polygon
 * [proposed] BSC
 
 
-### MVP-1: Swap at the best price
+### :heavy_check_mark: MVP-1: Swap at the best price
 
 Decentralized swap at the best price protocol. The best route and rate is calculated from the most sources of liquidity in a blockchain using the best liquidity aggregators. Transactions are executed through the Stability [MetaRouter](https://github.com/stabilitydao/core/blob/develop/contracts/swap/MetaRouter.sol).
 
 #### Aggregator integrations
 
-* **1inch** [api docs](https://docs.1inch.io/docs/aggregation-protocol/introduction)
-* **0x** [api docs](https://docs.0x.org/0x-api-swap/introduction)
-* **OpenOcean** [api docs](https://docs.openocean.finance/api/openocean-dex-api-3.0)
-
-Status: [**live**](https://reactswap.com)
-
+* [x] **1inch** [api docs](https://docs.1inch.io/docs/aggregation-protocol/introduction)
+* [x] **0x** [api docs](https://docs.0x.org/0x-api-swap/introduction)
+* [x] **OpenOcean** [api docs](https://docs.openocean.finance/api/openocean-dex-api-3.0)
+* [ ] **ParaSwap** [api docs](https://developers.paraswap.network/api/master)
 
 ### MVP-2: Crypto trading
 
 Decentralized crypto trading and analytics
 
-#### Features
-* :heavy_check_mark: Price charts
+#### ToDo
+* [x] price charts by **DexScreener** [api docs](https://docs.dexscreener.com/)
+* [ ] technical analysis gauges
+* [ ] ReactSwap tokens API [0.25 WETH]
+* Analytics (SEO/SSR, autoupdate)
+  * [ ] Tokens page [0.125 WETH]
+  * [ ] Token page [0.125 WETH]
 * Account
-* Analytics
-* Trading gauges
+  * [ ] Tokens value ($)
+  * [ ] 24h change
+  * [ ] portfolio tracker (SEO/SSR)
 
-#### DeFi data providers
-* **DexScreener** [api docs](https://docs.dexscreener.com/)
-
-Status: [**v0 live**](https://reactswap.com)
+Status: development
 
 
 ### MVP-3: Cross-chain swap
@@ -58,25 +59,27 @@ Status: exploring orderbook protocols
 
 ### MVP-5: AMM
 
-Next-gen AMM DeX.
+Next-gen AMM DeX. Inspired by Solidly, UniswapV3 and Balancer.
 
-#### Factories
+#### Pools
 
-* S-pool factory. Solidly volatile (x*y) and stable (x3y+y3x) pools.
-* U-pool factory. Uniswap volatile (x*y) pools with price ranges.
-* B-pool factory. Balancer pools: 2-16 tokens, constant average formula/value function, different pool weight.
+* **Stable** (2 tokens, x3y+y3x, ft lp)
+* **Volatile** (2 tokens, [price range x*y](https://docs.uniswap.org/protocol/concepts/V3-overview/concentrated-liquidity), nft lp)
+* **Weighted** (2-8 tokens, [weighted x∗y](https://dev.balancer.fi/resources/pool-math/weighted-math))
 
-#### Incentives
+#### Liquidity incentives
 
-Cronje's ve-3,3: lock REACT for veREACT and vote for gauge, reward voters by bribes.
+Vote/vest escrow tokenomics. Lock REACT for veREACT and vote for gauge, reward voters by bribes.
 
 #### Proposed features
 
-* U-pool: remove liquidity on out of range
+* cheap/free token whitelist for gauge/farm creation
+* volatile pool: remove liquidity on out of range
 * private pools
-* liquidity lock gauge
+* liquidity lock
+* multichain token and voting
 
-Status: idea
+Status: idea, research
 
 
 ## Start coding
