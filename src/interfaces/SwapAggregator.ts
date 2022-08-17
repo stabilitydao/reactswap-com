@@ -1,11 +1,11 @@
-import { AggregatorId } from '@/src/enums/AggregatorId'
 import { ChainId } from '@/src/enums/ChainId'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
+import { ProtocolId } from "@/src/enums/ProtocolId";
 
 export interface SwapAggregator {
-  id: AggregatorId
+  id: ProtocolId
   chainId: ChainId
   apiEndpoint: string
   logoURI: string

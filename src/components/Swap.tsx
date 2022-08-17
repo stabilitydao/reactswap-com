@@ -11,7 +11,6 @@ import { useChainId } from '@/src/state/network/hooks'
 import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { Field } from '@/src/state/swap/actions'
 import CurrencyInputPanel from '@/components/CurrencyInputPanel'
-import { AggregatorId } from '@/src/enums/AggregatorId'
 import { aggregators } from '@/src/constants/aggregators'
 import { SwapQuote } from '@/src/types/SwapQuote'
 import { maxAmountSpend } from '@/src/utils/maxAmountSpend'
@@ -25,7 +24,6 @@ import { useSetUserSlippageTolerance } from '@/src/state/user/hooks'
 import { metarouter } from '@/src/constants/contracts'
 import { useMetaRouterContract } from '@/src/hooks/useContract'
 import Routing from '@/components/Routing'
-import { OneInchLiquiditySource } from '@/src/types/AggApiTypes'
 import { currencyId } from '@/src/utils/currencyId'
 import { toast } from 'react-toastify';
 import { chainIdMapping, DexScreener, Pair } from '@/src/dexData/DexScreener'
@@ -38,6 +36,8 @@ import {fee} from "@/src/constants/fees";
 import {calcOutputExactMin} from "@/src/utils";
 import {MdExpandLess, MdExpandMore} from "react-icons/md";
 import QuestionHelper from "@/components/QuestionHelper";
+import {ProtocolId} from "@/src/enums/ProtocolId";
+import {protocols} from "@/src/constants/protocols";
 
 function Swap() {
   // console.log('Swap render')
@@ -57,7 +57,7 @@ function Swap() {
   } = useDerivedSwapInfo()
 
   // component state
-  const [quotes, setQuotes] = useState<{[id in AggregatorId|string]?: SwapQuote}>({})
+  const [quotes, setQuotes] = useState<{[id in ProtocolId]?: SwapQuote}>({})
   const [pendingApproval, setPendingApproval] = useState<boolean>(false)
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
   const [approved, setApproved] = useState<boolean>(false)
@@ -65,11 +65,10 @@ function Swap() {
   const [pendingSwap, setPendingSwap] = useState<boolean>(false)
   const [slippageInput, setSlippageInput] = useState(allowedSlippage.toFixed(1))
   const [slippageError, setSlippageError] = useState<'invalid input' | false>(false)
-  const [oneInchSources, setOneInchSources] = useState<{[id:string]:OneInchLiquiditySource}>({})
   const [chartPairAddress, setChartPairAddress] = useState<string|undefined>()
   const [pairs, setPairs] = useState<{[id:string]:Pair}>({})
   const [seconds, setSeconds] = useState(0)
-  const [manualSelectedAgg, setManualSelectedAgg] = useState<string|undefined>()
+  const [manualSelectedAgg, setManualSelectedAgg] = useState<ProtocolId|undefined>()
   const [showRouting, setShowRouting] = useState<boolean>(false)
 
   // console.debug('inputCurrency:', inputCurrency?.symbol)
@@ -157,21 +156,19 @@ function Swap() {
     // console.log('Quote effect hook. deps:', chainId, inputCurrency?.symbol, outputCurrency?.symbol, parsedAmount?.quotient.toString(), allowedSlippage.quotient.toString())
     if (inputCurrency && outputCurrency && parsedAmount) {
       for (const aggId in aggregators[chainId]) {
-        console.log(`Quoting ${aggId}..`)
-        aggregators[chainId][aggId].getQuote(
+        const protocolId:ProtocolId = parseInt(aggId)
+        console.log(`Quoting ${protocols[protocolId].title}..`)
+        aggregators[chainId][protocolId]?.getQuote(
           inputCurrency,
           outputCurrency,
           parsedAmount,
           parseFloat(allowedSlippage.toFixed(2)),
           account ?? undefined
         ).then((quote:SwapQuote) => {
-          console.log(`${aggId} reply quote data:`, quote)
-          if (!quotes[aggId] || quotes[aggId]?.outputAmountFixed != quote.outputAmountFixed) {
+          console.log(`${protocols[protocolId].title} reply quote data:`, quote)
+          if (!quotes[protocolId] || quotes[protocolId]?.outputAmountFixed != quote.outputAmountFixed) {
             if (isSubscribed) {
-              // setQuotes(q => ({...q, [aggId]: quote}))
-              setQuotes(q => Object.entries({...q, [aggId]: quote})
-                .sort(([,a],[,b]) => b?.outputAmountFixed && a?.outputAmountFixed ? parseFloat(b.outputAmountFixed) - parseFloat(a.outputAmountFixed) : 0)
-                .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}))
+              setQuotes(q => ({...q, [protocolId]: quote}))
             }
           }
         })
@@ -191,11 +188,12 @@ function Swap() {
   // calculate best swap quote
   const bestQuote: SwapQuote|undefined = useMemo(()=> {
     let bestQuote: SwapQuote|undefined
-    if (manualSelectedAgg) {
+    if (manualSelectedAgg !== undefined) {
       bestQuote = quotes[manualSelectedAgg]
     } else {
       Object.keys(quotes).forEach(aggId => {
-        const q = quotes[aggId]
+        const protocolId: ProtocolId = parseInt(aggId)
+        const q = quotes[protocolId]
         if (
             q && q.outputAmountFixed && parseFloat(q.outputAmountFixed) > 0
             && (
@@ -212,8 +210,18 @@ function Swap() {
       JSON.stringify(quotes),
       manualSelectedAgg
   ])
+
+  const quotesOrder: ProtocolId[] = useMemo(() => {
+    return Object.entries(quotes)
+        .sort(([,a],[,b]) => b?.outputAmountFixed && a?.outputAmountFixed ? parseFloat(b.outputAmountFixed) - parseFloat(a.outputAmountFixed) : -1)
+        .map(a => a[1].protocolId)
+  }, [
+    JSON.stringify(quotes),
+  ])
+
   // console.log('Quotes:', quotes)
   // console.log('BestQuote:', bestQuote)
+  // console.log('Quotes order', quotesOrder)
 
   // check balance
   const insufficientBalance =
@@ -267,7 +275,7 @@ function Swap() {
       ) {
         const aggId = bestQuote.protocolId
         console.log(`Buildtx ${aggId} await`)
-        const txData =  await aggregators[chainId][aggId].buildTx(
+        const txData =  await aggregators[chainId][aggId]?.buildTx(
           inputCurrency,
           outputCurrency,
           parsedAmount,
@@ -457,22 +465,6 @@ function Swap() {
 
   const setUserSlippageTolerance = useSetUserSlippageTolerance()
 
-  // load 1Inch liquidity sources for DeX logo images
-  useEffect(() => {
-    const run = async () => {
-      const ls = await aggregators[chainId][AggregatorId.OneInch].getSources()
-      const sources: {[id:string]:OneInchLiquiditySource} = {}
-      ls.forEach((source: OneInchLiquiditySource) => {
-        if (source.id) {
-          sources[source.id] = source
-        }
-      })
-      // console.debug('1Inch sources: ', sources)
-      setOneInchSources(sources)
-    }
-    run()
-  }, [])
-
   return (
     <div className="flex w-full mt-5 md:mt-0 mb-10 flex-wrap lg:flex-nowrap justify-center gap-5" style={{maxWidth: 1500}}>
       <div className="flex w-full flex-col md:flex-row lg:w-72 xl:w-full xl:max-w-md lg:flex-col items-center md:items-start mb-10 lg:justify-start">
@@ -596,18 +588,18 @@ function Swap() {
                 setShowRouting(!showRouting)
               }}>
                 <div className="flex w-20 text-md">Routing</div>
-                <div className="w-20">{manualSelectedAgg ? (
+                <div className="w-20">{manualSelectedAgg !== undefined ? (
                     <div className="text-orange-700 dark:text-orange-200 font-bold border-2 border-orange-700 dark:border-orange-200 px-2 rounded-lg">manual</div>
                 ) : (
                     <div className="h-6 text-sm text-green-700 dark:text-green-200 font-bold border-2 border-green-700 dark:border-green-200 px-2 rounded-lg">auto</div>
                 )}</div>
                 <div className="w-32 md:w-48 lg:w-16 xl:w-48 flex items-center ml-5 flex-none overflow-hidden">
                   {bestQuote &&
-                      <img src={aggregators[chainId][bestQuote.protocolId].logoURI} className="w-8 h-8" alt={bestQuote.protocolId}
-                           title={bestQuote.protocolId}/>
+                      <img src={protocols[bestQuote.protocolId].img} className="w-8 h-8" alt={protocols[bestQuote.protocolId].title}
+                           title={protocols[bestQuote.protocolId].title}/>
                   }
                   {bestQuote &&
-                      <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} showDexOnly={true} />
+                      <Routing chainId={chainId} bestQuote={bestQuote} showDexOnly={true} />
                   }
                 </div>
                 <div className="absolute right-0 pr-2">
@@ -624,26 +616,35 @@ function Swap() {
                 overflow: 'hidden',
               }}>
                 <div className="flex text-sm pl-4 mb-2 md:mb-1 mt-3">Quotes</div>
-                {quotes && parseFloat(inputValue) > 0 && Object.keys(quotes).map((aggId, index) => {
-                  const isSelected = manualSelectedAgg == aggId
-                  const isBestQuote = index == 0
+                {quotes && parseFloat(inputValue) > 0 && quotesOrder.map((protocolId, index) => {
+                  const isSelected = manualSelectedAgg == protocolId
+                  const isBestQuote = protocolId === quotesOrder[0]
+                  const canClick = quotes[protocolId]?.outputAmountFixed || isSelected
 
                   return (
-                      <div key={aggId} className={isSelected ? "flex pl-2 py-2 items-center w-full border-2 dark:border-orange-200 rounded-xl cursor-pointer" : "flex pl-2 py-2 items-center w-full cursor-pointer border-2 border-transparent"} onClick={() => {
-                        if (manualSelectedAgg && isSelected) {
-                          setManualSelectedAgg(undefined)
-                        } else {
-                          setManualSelectedAgg(aggId)
+                      <div
+                          key={protocolId}
+                          className={isSelected ? "flex pl-2 py-2 items-center w-full border-2 dark:border-orange-200 rounded-xl" : "flex pl-2 py-2 items-center w-full border-2 border-transparent"}
+                          style={{
+                            cursor: canClick ? 'pointer' : 'default',
+                          }}
+                          onClick={() => {
+                        if (canClick) {
+                          if (manualSelectedAgg !== undefined && isSelected) {
+                            setManualSelectedAgg(undefined)
+                          } else {
+                            setManualSelectedAgg(protocolId)
+                          }
                         }
                       }}
                       >
-                        <img src={aggregators[chainId][aggId].logoURI} className="w-8 h-8" alt={aggId} title={aggId} />
+                        <img src={protocols[protocolId].img} className="w-8 h-8" alt={protocols[protocolId].title} title={protocols[protocolId].title} />
                         <div className="text-lg pl-4">
                           {isBestQuote ? (
-                              <span className="dark:text-teal-200">{quotes[aggId]?.outputAmountFixed}</span>
-                          ) : quotes[aggId]?.outputAmountFixed}
-                          {quotes[aggId]?.error && (
-                              <span className="text-sm text-left">{quotes[aggId]?.error}</span>
+                              <span className="dark:text-teal-200">{quotes[protocolId]?.outputAmountFixed}</span>
+                          ) : quotes[protocolId]?.outputAmountFixed}
+                          {(!canClick || quotes[protocolId]?.error) && (
+                              <span className="text-sm text-left text-orange-300">{quotes[protocolId]?.error}</span>
                           )}
                         </div>
                       </div>
@@ -652,7 +653,7 @@ function Swap() {
                 <div className="mt-4 flex text-sm pl-4 md:mb-2">Route</div>
                 <div>
                   {bestQuote &&
-                      <Routing chainId={chainId} bestQuote={bestQuote} inchSources={oneInchSources} />
+                      <Routing chainId={chainId} bestQuote={bestQuote} />
                   }
                 </div>
               </div>

@@ -1,83 +1,79 @@
-import { SwapQuote } from '@/src/types/SwapQuote'
-import { AggregatorId } from '@/src/enums/AggregatorId'
-import { OneInchLiquiditySource, OneInchLuqidityPoolRoute, OpenOceanSubRoute } from '@/src/types/AggApiTypes'
-import { useAllTokens } from '@/src/hooks/useTokenList'
-import { WrappedTokenInfo } from '@/src/state/lists/wrappedTokenInfo'
-import { Token } from '@uniswap/sdk-core'
-import { toChecksumAddress } from '@walletconnect/utils'
-import { sourceMappingOpenOceanOneInch, sourceMappingZeroXOneInch } from '@/src/constants/aggregators'
-import { ChainId } from '@/src/enums/ChainId'
+import {SwapQuote} from '@/src/types/SwapQuote'
+import {useAllTokens} from '@/src/hooks/useTokenList'
+import {WrappedTokenInfo} from '@/src/state/lists/wrappedTokenInfo'
+import {Token} from '@uniswap/sdk-core'
+import {toChecksumAddress} from '@walletconnect/utils'
+import {sourceMappingOneInch, sourceMappingOpenOcean, sourceMappingZeroX,} from '@/src/constants/aggregators'
+import {ChainId} from '@/src/enums/ChainId'
 import {BiFastForward} from 'react-icons/bi'
-import { getCurrencyLogoURI, isNativeAddress, shortenAddress } from '@/src/utils'
-import { native } from '@/src/constants/currencies'
+import {getCurrencyLogoURI, isNativeAddress, shortenAddress} from '@/src/utils'
+import {native} from '@/src/constants/currencies'
+import {protocols} from "@/src/constants/protocols";
+import {Protocol} from "@/src/types/Protocol";
+import {ProtocolId} from "@/src/enums/ProtocolId";
+import {OpenOceanSubRoute} from "@/src/agg/OpenOcean";
+import {OneInchLuqidityPoolRoute} from "@/src/agg/OneInch";
 
 interface SwapRoutingProps {
   bestQuote: SwapQuote
-  inchSources: {
-    [id:string]: OneInchLiquiditySource
-  }
   chainId: ChainId
   showDexOnly?: boolean
 }
 
-function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRoutingProps) {
+function Routing({bestQuote, chainId, showDexOnly = false}: SwapRoutingProps) {
   // console.log(`Routing bestQuote sources ${bestQuote.protocolId}`, bestQuote.sources)
   const aggId = bestQuote.protocolId
 
   const allTokens: { [address: string]: Token|WrappedTokenInfo } = useAllTokens()
 
   if (showDexOnly) {
-    const dexList: { [id: string]: { img: string, name: string, } } = {}
-    if (aggId === AggregatorId.OpenOcean) {
-      bestQuote.sources.routes[0].subRoutes.forEach((r: OpenOceanSubRoute) => {
-        Object.keys(r.dexes).forEach((i: string, index: number) => {
-          const dex = r.dexes[index]
-          const inchSource: OneInchLiquiditySource | undefined = sourceMappingOpenOceanOneInch[chainId][dex.dex] ? inchSources[sourceMappingOpenOceanOneInch[chainId][dex.dex]] : undefined
-          if (inchSource && !dexList[inchSource.title]) {
-            dexList[inchSource.title] = {
-              img: inchSource.img_color,
-              name: inchSource.title,
-            }
-          }
-        })
-      })
-    } else if (aggId === AggregatorId.OneInch) {
-      Object.keys(bestQuote.sources).forEach((i) => {
-        const routeBlock = bestQuote.sources[i]
-        routeBlock.forEach((tokenToRoute: OneInchLuqidityPoolRoute[]) => {
-          tokenToRoute.forEach((liquidityPoolRoute: OneInchLuqidityPoolRoute) => {
-            if (inchSources[liquidityPoolRoute.name]) {
-              const inchSource = inchSources[liquidityPoolRoute.name]
-              if (inchSource && !dexList[inchSource.title]) {
-                dexList[inchSource.title] = {
-                  img: inchSource.img_color,
-                  name: inchSource.title,
-                }
-              }
+    const dexList: {[id in ProtocolId]?: Protocol} = {}
+    if (bestQuote.sources) {
+      if (aggId === ProtocolId.openocean) {
+        bestQuote.sources.routes[0].subRoutes.forEach((r: OpenOceanSubRoute) => {
+          Object.keys(r.dexes).forEach((i: string, index: number) => {
+            const dex = r.dexes[index]
+            const pId = sourceMappingOpenOcean[chainId][dex.dex]
+            const protocol = protocols[pId]
+            if (protocol) {
+              dexList[pId] = protocol
             }
           })
         })
-      })
-    } else if (aggId === AggregatorId.ZeroX) {
-      Object.keys(bestQuote.sources).forEach((i) => {
-        const order = bestQuote.sources[i]
-        const inchSource: OneInchLiquiditySource | undefined = sourceMappingZeroXOneInch[chainId][order.source] ? inchSources[sourceMappingZeroXOneInch[chainId][order.source]] : undefined
-        if (inchSource && !dexList[inchSource.title]) {
-          dexList[inchSource.title] = {
-            img: inchSource.img_color,
-            name: inchSource.title,
+      } else if (aggId === ProtocolId.oneinch) {
+        Object.keys(bestQuote.sources).forEach((i) => {
+          const routeBlock = bestQuote.sources[i]
+          routeBlock.forEach((tokenToRoute: OneInchLuqidityPoolRoute[]) => {
+            tokenToRoute.forEach((liquidityPoolRoute: OneInchLuqidityPoolRoute) => {
+              const pId = sourceMappingOneInch[chainId][liquidityPoolRoute.name]
+              const protocol = protocols[pId]
+              if (protocol) {
+                dexList[pId] = protocol
+              }
+            })
+          })
+        })
+      } else if (aggId === ProtocolId.zerox) {
+        Object.keys(bestQuote.sources).forEach((i) => {
+          const order = bestQuote.sources[i]
+          const pId = sourceMappingZeroX[chainId][order.source]
+          const protocol = protocols[pId]
+          if (protocol) {
+            dexList[pId] = protocol
           }
-        }
-      })
+        })
+      }
     }
 
     // console.log('dexlist:', dexList)
 
     return (
         <div className="flex lg:hidden xl:flex">
-          {Object.keys(dexList).map(name => {
+          {Object.keys(dexList).map(k => {
+            const protocolId: ProtocolId = parseInt(k)
+            const protocol = dexList[protocolId]
             return (
-                <img className="w-6 h-6 mx-1" key={name} src={dexList[name].img} alt={name}/>
+                <img className="w-6 h-6 mx-1" key={protocol?.title} src={protocol?.img} alt={protocol?.title}/>
             )
           })}
         </div>
@@ -86,8 +82,8 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
 
   return (
     <>
-      <div className={aggId === AggregatorId.OneInch ? "flex flex-col" : "flex flex-row flex-wrap justify-center"}>
-        {aggId === AggregatorId.OpenOcean &&
+      <div className={aggId === ProtocolId.oneinch ? "flex flex-col" : "flex flex-row flex-wrap justify-center"}>
+        {aggId === ProtocolId.openocean &&
           bestQuote.sources.routes[0].subRoutes.map((r:OpenOceanSubRoute, index: number) => {
             // console.log(r)
             const fromTokenAddr = toChecksumAddress(r.from)
@@ -115,12 +111,10 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
                   {Object.keys(r.dexes).map((i: string, index: number) => {
                     const dex = r.dexes[index]
                     // console.log(dex)
-                    const inchSource:OneInchLiquiditySource|undefined = sourceMappingOpenOceanOneInch[chainId][dex.dex] ? inchSources[sourceMappingOpenOceanOneInch[chainId][dex.dex]] : undefined
-                    // console.log(inchSource)
-
-                    return inchSource ? (
+                    const protocol = sourceMappingOpenOcean[chainId][dex.dex] ? protocols[sourceMappingOpenOcean[chainId][dex.dex]] : undefined
+                    return protocol ? (
                       <div key={'oo-source' + i + fromTokenAddr + toTokenAddr}>
-                        <img className="h-9 w-9 m-1.5" src={inchSource.img_color} alt={inchSource.title} title={inchSource.title} />
+                        <img className="h-9 w-9 m-1.5" src={protocol.img} alt={protocol.title} title={protocol.title} />
                       </div>
                     ) : null
                   })}
@@ -130,8 +124,8 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
           })
         }
 
-        {Object.keys(bestQuote.sources).map(( i, index) => {
-          if (aggId === AggregatorId.OneInch) {
+        {bestQuote.sources && Object.keys(bestQuote.sources).map(( i, index) => {
+          if (aggId === ProtocolId.oneinch) {
             const routeBlock = bestQuote.sources[i]
             // console.log('Route block', routeBlock)
 
@@ -161,11 +155,12 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
                       <div className="inline-flex flex-row flex-wrap justify-center">
                         {tokenToRoute.map((liquidityPoolRoute:OneInchLuqidityPoolRoute, index) => {
                           // console.log('liquidityPoolRoute', liquidityPoolRoute)
+                          const protocol = protocols[sourceMappingOneInch[chainId][liquidityPoolRoute.name]]
 
                           return (
                             <div key={'' + index + fromTokenAddr + toTokenAddr + liquidityPoolRoute.name} className="flex text-sm">
-                              {inchSources[liquidityPoolRoute.name] && (
-                                <img className="h-6 w-6 mx-1.5 my-1.5" src={inchSources[liquidityPoolRoute.name].img_color} alt={liquidityPoolRoute.name} title={inchSources[liquidityPoolRoute.name].title} />
+                              {protocol && (
+                                <img className="h-6 w-6 mx-1.5 my-1.5" src={protocol.img} alt={protocol.title} title={protocol.title} />
                               )}
                             </div>
                           )
@@ -176,7 +171,7 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
                 })}
               </div>
             )
-          } else if (aggId === AggregatorId.ZeroX) {
+          } else if (aggId === ProtocolId.zerox) {
             const order = bestQuote.sources[i]
             // console.log('0x or:', order)
 
@@ -184,7 +179,7 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
             const toTokenAddr = toChecksumAddress(order.makerToken)
             const fromToken = allTokens[fromTokenAddr] && allTokens[fromTokenAddr] instanceof WrappedTokenInfo ? allTokens[fromTokenAddr] as WrappedTokenInfo : undefined
             const toToken = allTokens[toTokenAddr] && allTokens[toTokenAddr] instanceof WrappedTokenInfo ? allTokens[toTokenAddr] as WrappedTokenInfo : undefined
-            const inchSource:OneInchLiquiditySource|undefined = sourceMappingZeroXOneInch[chainId][order.source] ? inchSources[sourceMappingZeroXOneInch[chainId][order.source]] : undefined
+            const protocol = protocols[sourceMappingZeroX[chainId][order.source]];
 
             return (
               <div
@@ -201,8 +196,8 @@ function Routing({bestQuote, inchSources, chainId, showDexOnly = false}: SwapRou
                   }
                 </div>
                 <div className="flex justify-center">
-                  {inchSource && (
-                    <img className="h-9 w-9 m-1.5" src={inchSource.img_color} alt={inchSource.title} title={inchSource.title} />
+                  {protocol && (
+                    <img className="h-9 w-9 m-1.5" src={protocol.img} alt={protocol.title} title={protocol.title} />
                   )
                   }
                 </div>

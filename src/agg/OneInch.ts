@@ -1,13 +1,13 @@
-import { SwapAggregator } from '@/src/interfaces/SwapAggregator'
-import { AggregatorId } from '@/src/enums/AggregatorId'
-import { ChainId } from '@/src/enums/ChainId'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import {SwapAggregator} from '@/src/interfaces/SwapAggregator'
+import {ChainId} from '@/src/enums/ChainId'
+import {Currency, CurrencyAmount} from '@uniswap/sdk-core'
 import axios from "axios";
-import { SwapQuote } from '@/src/types/SwapQuote'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
+import {SwapQuote} from '@/src/types/SwapQuote'
+import {TransactionRequest} from '@ethersproject/abstract-provider'
+import {ProtocolId} from "@/src/enums/ProtocolId";
 
 export class OneInch implements SwapAggregator {
-  id: AggregatorId = AggregatorId.OneInch
+  id: ProtocolId = ProtocolId.oneinch
   chainId: ChainId
   apiEndpoint: string
   logoURI: string
@@ -18,7 +18,6 @@ export class OneInch implements SwapAggregator {
     this.logoURI = logoURI
   }
 
-  // getting swap without parsing and typing
   async getSources(): Promise<[]> {
     const url = `${this.apiEndpoint}liquidity-sources`
 
@@ -156,4 +155,11 @@ export class OneInch implements SwapAggregator {
       return undefined
     }
   }
+}
+
+export type OneInchLuqidityPoolRoute = {
+  name: string,
+  fromTokenAddress: string,
+  toTokenAddress: string,
+  part: string,
 }

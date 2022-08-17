@@ -1,13 +1,13 @@
-import { SwapAggregator } from '@/src/interfaces/SwapAggregator'
-import { AggregatorId } from '@/src/enums/AggregatorId'
-import { ChainId } from '@/src/enums/ChainId'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import {SwapAggregator} from '@/src/interfaces/SwapAggregator'
+import {ChainId} from '@/src/enums/ChainId'
+import {Currency, CurrencyAmount} from '@uniswap/sdk-core'
 import axios from "axios";
-import { SwapQuote } from '@/src/types/SwapQuote'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
+import {SwapQuote} from '@/src/types/SwapQuote'
+import {TransactionRequest} from '@ethersproject/abstract-provider'
+import {ProtocolId} from "@/src/enums/ProtocolId";
 
 export class OpenOcean implements SwapAggregator {
-  id: AggregatorId = AggregatorId.OpenOcean
+  id: ProtocolId = ProtocolId.openocean
   chainId: ChainId
   apiEndpoint: string
   logoURI: string
@@ -57,7 +57,7 @@ export class OpenOcean implements SwapAggregator {
         url,
         params,
       })
-      console.log(`${this.id} quote reply raw data:`, data)
+      // console.log(`OpenOcean quote reply raw data:`, data)
 
       return {
         chainId: this.chainId,
@@ -111,7 +111,7 @@ export class OpenOcean implements SwapAggregator {
         url,
         params,
       })
-      console.log(`${this.id} swap reply raw data:`, data)
+      // console.log(`OpenOcean swap reply raw data:`, data)
 
       return {
         from,
@@ -140,4 +140,13 @@ export class OpenOcean implements SwapAggregator {
 
     return 'eth'
   }
+}
+
+export type OpenOceanSubRoute = {
+  from: string,
+  to: string,
+  dexes: {
+    dex: string,
+  }[],
+  parts: number,
 }

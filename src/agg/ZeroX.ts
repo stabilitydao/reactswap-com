@@ -1,14 +1,14 @@
-import { SwapAggregator } from '@/src/interfaces/SwapAggregator'
-import { AggregatorId } from '@/src/enums/AggregatorId'
-import { ChainId } from '@/src/enums/ChainId'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import {SwapAggregator} from '@/src/interfaces/SwapAggregator'
+import {ChainId} from '@/src/enums/ChainId'
+import {Currency, CurrencyAmount} from '@uniswap/sdk-core'
 import axios from "axios";
-import { SwapQuote } from '@/src/types/SwapQuote'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { currencyId } from '@/src/utils/currencyId'
+import {SwapQuote} from '@/src/types/SwapQuote'
+import {TransactionRequest} from '@ethersproject/abstract-provider'
+import {currencyId} from '@/src/utils/currencyId'
+import {ProtocolId} from "@/src/enums/ProtocolId";
 
 export class ZeroX implements SwapAggregator {
-  id: AggregatorId = AggregatorId.ZeroX
+  id: ProtocolId = ProtocolId.zerox
   chainId: ChainId
   apiEndpoint: string
   logoURI: string
