@@ -35,6 +35,7 @@ export default function Web3Status() {
     try {
       deactivate()
       setModalOpened(false)
+      localStorage.setItem("activate", '')
     } catch (ex) {
       console.log(ex)
     }
