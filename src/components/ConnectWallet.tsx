@@ -1,5 +1,5 @@
 import { useWeb3React } from '@web3-react/core'
-import { useState } from 'react'
+import {useState} from 'react'
 import { injected, getWalletConnect } from '@/src/connectors'
 import { BiWallet } from 'react-icons/bi'
 import Modal from '@/components/Modal'
@@ -22,6 +22,7 @@ export default function ConnectWallet({smCollapse = false} : {smCollapse?: boole
     }
 
     setModalOpened(false)
+    localStorage.setItem("activate", 'injected')
   }
 
   async function connectWalletConnect() {
@@ -35,6 +36,7 @@ export default function ConnectWallet({smCollapse = false} : {smCollapse?: boole
     }
 
     setModalOpened(false)
+    localStorage.setItem("activate", 'walletconnect')
   }
 
   return (

@@ -508,11 +508,11 @@ function Swap() {
           <div className="flex h-48 mt-5 mb-5 w-full max-w-sm lg:w-72 xl:w-full xl:max-w-md flex-col bg-[#fff3db] dark:bg-[#2d2d2d] rounded-2xl p-3 shadow-2xl dark:shadow-none dark:shadow-lg">
             <div className="flex dark:text-[#e1e1cd] font-bold">
               {bestQuote && bestQuote.outputAmountFixed && inputValue && chartPairAddress && pairs[chartPairAddress] &&
-                  <div className="flex items-start flex-col">
-                    <div className="text-xs">
+                  <div className="flex items-start flex-col text-left">
+                    <div className="text-sm lg:text-xs xl:text-sm">
                       1 {inputCurrency?.symbol} = {Math.round(1000000*parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 1000000} {outputCurrency?.symbol} = ${inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? pairs[chartPairAddress].priceUsd : Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * parseFloat(bestQuote.outputAmountFixed) / inputValue)/ 100}
                     </div>
-                    <div className="text-xs">
+                    <div className="text-sm lg:text-xs xl:text-sm">
                       1 {outputCurrency?.symbol} = {Math.round(1000000*parseFloat(inputValue) / parseFloat(bestQuote.outputAmountFixed))/ 1000000} {inputCurrency?.symbol} = ${inputCurrency?.symbol == pairs[chartPairAddress].baseToken.symbol ? Math.round(100*parseFloat(pairs[chartPairAddress].priceUsd || '0') * inputValue / parseFloat(bestQuote.outputAmountFixed))/ 100 : pairs[chartPairAddress].priceUsd}
                     </div>
                   </div>
@@ -520,7 +520,7 @@ function Swap() {
             </div>
             <div className="flex h-7 justify-start text-left dark:text-[#e1e1cd] font-bold">
               {bestQuote?.outputAmount && outputCurrency &&
-                  <div className="text-xs">Output exact minimum
+                  <div className="text-sm lg:text-xs xl:text-sm">Output exact minimum
                     <QuestionHelper
                         text={
                           <span>
